@@ -43,3 +43,8 @@ Thumbs.db
 # Celery
 celerybeat-schedule
 celerybeat.pid
+
+# Celery beat schedule
+backend/celerybeat-schedule.bak
+backend/celerybeat-schedule.dat
+backend/celerybeat-schedule.dir
