@@ -1,0 +1,15 @@
+django==4.2.*
+djangorestframework==3.15.*
+djangorestframework-simplejwt==5.*
+django-cors-headers==4.*
+psycopg2-binary==2.9.*
+celery==5.*
+redis==5.*
+cloudinary==1.*
+django-cloudinary-storage==0.3.*
+razorpay==1.*
+python-decouple==3.*
+Pillow==10.*
+django-filter==23.*
+whitenoise==6.*
+dj-database-url==2.*

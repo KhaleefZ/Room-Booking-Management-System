@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+venv/
+env/
+
+# Django
+*.log
+*.pot
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables — NEVER commit these
+.env
+backend/.env
+
+# Node
+node_modules/
+frontend/public/node_modules/
+frontend/admin/node_modules/
+
+# Vite build output
+frontend/public/dist/
+frontend/admin/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
