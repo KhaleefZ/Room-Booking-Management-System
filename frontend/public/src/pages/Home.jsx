@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getRooms } from "../api/rooms";
 import RoomCard from "../components/ui/RoomCard";
 import Spinner from "../components/ui/Spinner";
+import logo from "../assets/logo.png";
 
 export default function Home() {
   const { data, isLoading } = useQuery({
@@ -15,32 +16,11 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-gray-900 text-white min-h-[85vh] flex items-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-brand-900 opacity-95" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="max-w-3xl">
-            <p className="text-brand-300 font-medium tracking-widest text-sm uppercase mb-4">
-              Welcome to HotelRBMS
-            </p>
-            <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight mb-6">
-              Where Comfort<br />
-              <span className="text-brand-400">Meets Luxury</span>
-            </h1>
-            <p className="text-gray-300 text-lg md:text-xl mb-10 leading-relaxed max-w-xl">
-              Experience world-class hospitality in the heart of the city.
-              Book your perfect stay in minutes.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link to="/rooms" className="btn-primary text-base px-8 py-4">
-                Browse Rooms
-              </Link>
-              <Link to="/about" className="btn-secondary text-base px-8 py-4 bg-transparent border-white text-white hover:bg-white/10">
-                Learn More
-              </Link>
-            </div>
-          </div>
-        </div>
-
+      <section className="relative bg-gray-900 text-white min-h-[85vh] flex items-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-center bg-no-repeat bg-[length:auto_80%] md:bg-contain opacity-100 pointer-events-none"
+          style={{ backgroundImage: `url(${logo})` }}
+        />
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
           <svg className="w-6 h-6 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">

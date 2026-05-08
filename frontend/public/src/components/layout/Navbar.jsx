@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import logo from "../../assets/logo.png";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -18,12 +19,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">H</span>
-            </div>
-            <span className="font-serif text-xl font-bold text-gray-900">
-              Hotel<span className="text-brand-600">RBMS</span>
-            </span>
+            <img src={logo} alt="HotelRBMS" className="h-10 w-auto" />
           </Link>
 
           {/* Desktop links */}
