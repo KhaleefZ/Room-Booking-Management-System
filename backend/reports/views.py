@@ -1,7 +1,8 @@
 import csv
+import io
 import datetime
-from django.db.models import Sum, Count
-from django.http import StreamingHttpResponse
+from django.db.models import Sum, Count, F
+from django.http import StreamingHttpResponse, HttpResponse
 from django.utils.dateparse import parse_date
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from bookings.models import Booking
 from rooms.models import Room
+from settings_app.models import HotelSettings
 
 CONFIRMED_STATUSES = [
     Booking.Status.CONFIRMED,
@@ -37,22 +39,43 @@ class RevenueReportView(APIView):
                 check_in__lte=to_date,
             )
             .values("check_in")
-            .annotate(revenue=Sum("total_amount"), booking_count=Count("id"))
+            .annotate(
+                revenue=Sum("total_amount"), 
+                tax=Sum("tax_amount"),
+                base=Sum("base_amount"),
+                discount=Sum("discount_amount"),
+                booking_count=Count("id")
+            )
             .order_by("check_in")
         )
 
-        total_revenue = sum(row["revenue"] for row in data)
+        total_revenue = sum(row["revenue"] or 0 for row in data)
+        total_tax = sum(row["tax"] or 0 for row in data)
+        total_base = sum(row["base"] or 0 for row in data)
+        total_discount = sum(row["discount"] or 0 for row in data)
         total_bookings = sum(row["booking_count"] for row in data)
 
         return Response({
             "from": str(from_date),
             "to": str(to_date),
             "total_revenue": total_revenue,
+            "total_tax": total_tax,
+            "total_base": total_base,
+            "total_discount": total_discount,
             "total_bookings": total_bookings,
+            "inventory": {
+                "total": Room.objects.count(),
+                "available": Room.objects.filter(status="Available").count(),
+                "occupied": Room.objects.filter(status="Occupied").count(),
+                "maintenance": Room.objects.filter(status__in=["Maintenance", "Cleaning"]).count(),
+            },
             "daily": [
                 {
                     "date": str(row["check_in"]),
                     "revenue": row["revenue"],
+                    "tax": row["tax"],
+                    "base": row["base"],
+                    "discount": row["discount"],
                     "booking_count": row["booking_count"],
                 }
                 for row in data
@@ -93,7 +116,7 @@ class OccupancyReportView(APIView):
 
         overall_pct = (
             round(sum(r["occupied_nights"] for r in result) / (total_nights * len(result)) * 100, 1)
-            if result and total_nights else 0
+            if result and total_nights and len(result) > 0 else 0
         )
 
         return Response({
@@ -117,42 +140,37 @@ class ExportCSVView(APIView):
             .order_by("check_in")
         )
 
-        def row_generator():
-            yield [
-                "Reference", "Guest Name", "Email", "Room", "Check-in",
-                "Check-out", "Nights", "Base Amount", "Discount",
-                "Tax", "Total Amount", "Status", "Promo Code",
-                "Payment ID", "Created At",
-            ]
-            for b in bookings:
-                yield [
-                    str(b.reference),
-                    b.guest.full_name,
-                    b.guest.email,
-                    f"Room {b.room.room_number} ({b.room.room_type})",
-                    str(b.check_in),
-                    str(b.check_out),
-                    b.nights,
-                    b.base_amount,
-                    b.discount_amount,
-                    b.tax_amount,
-                    b.total_amount,
-                    b.status,
-                    b.promo_code.code if b.promo_code else "",
-                    b.payment_id,
-                    b.created_at.strftime("%Y-%m-%d %H:%M"),
-                ]
+        # Use pseudo-buffer for better streaming if large, but stay with CSV writer
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="luxury_ledger_{from_date}_{to_date}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            "TRANSACTION REF", "GUEST NAME", "ID TYPE", "ID NUMBER", 
+            "ROOM", "ROOM TYPE", "CHECK-IN", "CHECK-OUT", "NIGHTS",
+            "BASE REVENUE", "DISCOUNT APPLIED", "TAXABLE AMOUNT", 
+            "GST (18%)", "TOTAL SETTLEMENT", "STATUS", "PAYMENT REF"
+        ])
 
-        class EchoBuffer:
-            def write(self, value):
-                return value
+        for b in bookings:
+            taxable = b.base_amount - b.discount_amount
+            writer.writerow([
+                str(b.reference).upper()[:8],
+                b.guest.full_name.upper(),
+                b.guest.id_type,
+                b.guest.id_number,
+                f"Suite {b.room.room_number}",
+                b.room.room_type,
+                b.check_in,
+                b.check_out,
+                b.nights,
+                float(b.base_amount),
+                float(b.discount_amount),
+                float(taxable),
+                float(b.tax_amount),
+                float(b.total_amount),
+                b.status.upper(),
+                b.payment_id or "N/A"
+            ])
 
-        writer = csv.writer(EchoBuffer())
-        response = StreamingHttpResponse(
-            (writer.writerow(row) for row in row_generator()),
-            content_type="text/csv",
-        )
-        response["Content-Disposition"] = (
-            f'attachment; filename="bookings_{from_date}_to_{to_date}.csv"'
-        )
         return response

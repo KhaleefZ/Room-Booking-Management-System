@@ -43,6 +43,19 @@ class RoomViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    @action(detail=True, methods=["patch"], permission_classes=[IsAuthenticated])
+    def update_status(self, request, pk=None):
+        room = self.get_object()
+        new_status = request.data.get("status")
+        if new_status not in Room.Status.values:
+            return Response(
+                {"error": "Invalid status."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        room.status = new_status
+        room.save(update_fields=["status"])
+        return Response({"status": room.status})
+
     @action(detail=True, methods=["get"], permission_classes=[AllowAny])
     def availability(self, request, pk=None):
         from django.utils import timezone

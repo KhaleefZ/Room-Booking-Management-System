@@ -23,7 +23,7 @@ class RoomListSerializer(serializers.ModelSerializer):
         fields = [
             "id", "room_number", "room_type", "floor",
             "bed_config", "capacity", "base_price", "status",
-            "primary_photo", "amenity_count",
+            "primary_photo", "amenity_count", "extra_bed", "address",
         ]
 
     def get_primary_photo(self, obj):
@@ -45,7 +45,7 @@ class RoomDetailSerializer(serializers.ModelSerializer):
             "id", "room_number", "room_type", "floor",
             "bed_config", "capacity", "base_price", "status",
             "description", "photos", "amenities",
-            "unavailable_dates", "created_at",
+            "unavailable_dates", "created_at", "extra_bed", "address",
         ]
 
     def get_unavailable_dates(self, obj):
@@ -67,7 +67,7 @@ class RoomWriteSerializer(serializers.ModelSerializer):
         fields = [
             "id", "room_number", "room_type", "floor",
             "bed_config", "capacity", "base_price", "status",
-            "description", "amenity_ids",
+            "description", "amenity_ids", "extra_bed", "address",
         ]
 
     def create(self, validated_data):

@@ -4,11 +4,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+import datetime
 
-from .models import Booking
+from .models import Booking, Invoice
 from .serializers import (
     BookingCreateSerializer, BookingListSerializer,
     BookingDetailSerializer, BookingStatusUpdateSerializer,
+    InvoiceSerializer
 )
 
 
@@ -41,6 +43,125 @@ class BookingViewSet(viewsets.ModelViewSet):
             BookingDetailSerializer(booking).data,
             status=status.HTTP_201_CREATED,
         )
+
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    def checkout(self, request, pk=None):
+        booking = self.get_object()
+        
+        if booking.status != Booking.Status.CHECKED_IN:
+            return Response(
+                {"error": "Only CheckedIn bookings can be checked out."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 1. Create Invoice
+        invoice, created = Invoice.objects.get_or_create(
+            booking=booking,
+            defaults={
+                "guest_name": booking.guest.full_name,
+                "guest_email": booking.guest.email,
+                "room_details": f"{booking.room.room_type} - Room {booking.room.room_number}",
+                "check_in": booking.check_in,
+                "check_out": booking.check_out,
+                "nights": booking.nights,
+                "base_amount": booking.base_amount,
+                "tax_amount": booking.tax_amount,
+                "discount_amount": booking.discount_amount,
+                "total_amount": booking.total_amount,
+            }
+        )
+
+        # 2. Update Booking Status
+        booking.status = Booking.Status.CHECKED_OUT
+        booking.save(update_fields=["status", "updated_at"])
+
+        # 3. Update Room Status
+        room = booking.room
+        room.status = Room.Status.CLEANING
+        # Room model does not have updated_at
+        room.save(update_fields=["status"])
+
+        # 4. Trigger Email Task
+        from payments.tasks import send_checkout_invoice
+        send_checkout_invoice.delay(invoice.id)
+
+        return Response({
+            "message": "Checkout successful",
+            "invoice": InvoiceSerializer(invoice).data,
+            "booking": BookingDetailSerializer(booking).data
+        })
+
+    @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated])
+    def download_invoice(self, request, pk=None):
+        booking = self.get_object()
+        try:
+            from .invoice_model import Invoice
+            invoice = Invoice.objects.filter(booking=booking).first()
+            
+            if not invoice or not invoice.pdf_file or not invoice.pdf_generated:
+                from .utils import generate_invoice_pdf
+                if not invoice:
+                    invoice = Invoice.objects.create(
+                        booking=booking,
+                        guest_name=booking.guest.full_name,
+                        guest_email=booking.guest.email,
+                        room_details=f"Unit {booking.room.room_number} ({booking.room.room_type})",
+                        check_in=booking.check_in,
+                        check_out=booking.check_out,
+                        nights=booking.nights,
+                        total_amount=booking.total_amount,
+                        tax_amount=booking.tax_amount,
+                        base_amount=booking.base_amount,
+                        discount_amount=booking.discount_amount,
+                    )
+                generate_invoice_pdf(invoice)
+                invoice.refresh_from_db()
+
+            # Method: Generate PDF on the fly and stream it directly
+            # This is the most reliable method as it avoids all cloud storage 401/404 issues
+            from django.template.loader import get_template
+            from xhtml2pdf import pisa
+            from io import BytesIO
+            from django.http import HttpResponse
+            from django.conf import settings
+            from settings_app.models import HotelSettings
+            from rooms.models import Room
+
+            hotel = HotelSettings.objects.first()
+            hotel_name = hotel.hotel_name if hotel else "RBMS EXECUTIVE HOTEL"
+            
+            # Fetch full room object for physical address if available
+            room_obj = None
+            try:
+                # Based on room_details link it back to a room number
+                room_num = invoice.room_details.split(' ')[1] 
+                room_obj = Room.objects.filter(room_number=room_num).first()
+            except:
+                pass
+
+            context = {
+                'invoice': invoice,
+                'hotel_name': hotel_name,
+                'hotel_address': "Tech Park, Phase II, Bangalore, India", # Default if no specific settings
+                'hotel_contact': "+91 98765 43210 | reservation@rbms.com",
+                'check_in_time': hotel.check_in_time if hotel else "14:00",
+                'check_out_time': hotel.check_out_time if hotel else "11:00",
+                'room': room_obj,
+                'is_formal': True
+            }
+            
+            template = get_template('invoices/invoice_pdf.html')
+            html = template.render(context)
+            
+            result = BytesIO()
+            pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+            
+            response = HttpResponse(result.getvalue(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="Invoice_{invoice.invoice_number}.pdf"'
+            return response
+
+        except Exception as e:
+            return Response({"error": f"Invoice generation error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=["patch"], permission_classes=[IsAuthenticated])
     def update_status(self, request, pk=None):  

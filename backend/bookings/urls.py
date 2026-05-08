@@ -5,4 +5,6 @@ from .views import BookingViewSet
 router = DefaultRouter()
 router.register(r"", BookingViewSet, basename="booking")
 
-urlpatterns = [path("", include(router.urls))]
+urlpatterns = [
+    path("", include(router.urls)),
+]

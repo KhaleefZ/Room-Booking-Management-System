@@ -46,10 +46,15 @@ export default function RoomCard({ room }) {
           <span className="text-gray-400 text-xs">Floor {room.floor}</span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
-          <span>🛏 {room.bed_config}</span>
-          <span>👥 Up to {room.capacity} guests</span>
-          {room.amenity_count > 0 && <span>✨ {room.amenity_count} amenities</span>}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {room.amenities?.slice(0, 3).map((amenity) => (
+            <span key={amenity.id} className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-[10px] font-medium text-gray-600">
+              {amenity.name}
+            </span>
+          ))}
+          {room.amenities?.length > 3 && (
+            <span className="text-[10px] text-gray-400">+{room.amenities.length - 3} more</span>
+          )}
         </div>
 
         <Link

@@ -17,13 +17,11 @@ class Amenity(models.Model):
 class Room(models.Model):
     class RoomType(models.TextChoices):
         STANDARD = "Standard", "Standard"
-        DELUXE = "Deluxe", "Deluxe"
-        SUITE = "Suite", "Suite"
-        FAMILY = "Family", "Family"
 
     class Status(models.TextChoices):
         AVAILABLE = "Available", "Available"
         OCCUPIED = "Occupied", "Occupied"
+        CLEANING = "Cleaning", "Cleaning"
         MAINTENANCE = "Maintenance", "Maintenance"
         BLOCKED = "Blocked", "Blocked"
 
@@ -33,6 +31,8 @@ class Room(models.Model):
     bed_config = models.CharField(max_length=50)
     capacity = models.PositiveIntegerField(default=2)
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
+    extra_bed = models.IntegerField(default=0, choices=[(0, 'No'), (1, 'Yes')])
+    address = models.TextField(help_text="Compulsory physical address of the room/unit")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.AVAILABLE)
     description = models.TextField(blank=True)
     amenities = models.ManyToManyField(Amenity, blank=True, related_name="rooms")

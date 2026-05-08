@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import RoomList from "./pages/rooms/RoomList";
 import RoomForm from "./pages/rooms/RoomForm";
 import BookingList from "./pages/bookings/BookingList";
+import BookingForm from "./pages/bookings/BookingForm";
 import BookingDetail from "./pages/bookings/BookingDetail";
 import GuestList from "./pages/guests/GuestList";
 import GuestDetail from "./pages/guests/GuestDetail";
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/rooms/new" element={<RoomForm />} />
         <Route path="/rooms/:id/edit" element={<RoomForm />} />
         <Route path="/bookings" element={<BookingList />} />
+        <Route path="/bookings/new" element={<BookingForm />} />
         <Route path="/bookings/:id" element={<BookingDetail />} />
         <Route path="/guests" element={<GuestList />} />
         <Route path="/guests/:id" element={<GuestDetail />} />

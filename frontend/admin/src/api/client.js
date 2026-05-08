@@ -2,7 +2,7 @@ import axios from "axios";
 import useAuthStore from "../store/authStore";
 
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1",
   headers: { "Content-Type": "application/json" },
 });
 
@@ -23,7 +23,7 @@ client.interceptors.response.use(
       try {
         const refresh = useAuthStore.getState().refreshToken;
         const res = await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/token/refresh/`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1"}/auth/token/refresh/`,
           { refresh }
         );
         useAuthStore.getState().setTokens(res.data.access, refresh);

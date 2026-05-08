@@ -12,6 +12,9 @@ export const createRoom = (data) =>
 export const updateRoom = (id, data) =>
   client.patch(`/rooms/${id}/`, data).then((r) => r.data);
 
+export const updateRoomStatus = (id, status) =>
+  client.patch(`/rooms/${id}/update_status/`, { status }).then((r) => r.data);
+
 export const deleteRoom = (id) =>
   client.delete(`/rooms/${id}/`).then((r) => r.data);
 

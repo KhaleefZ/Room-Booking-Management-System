@@ -10,6 +10,18 @@ import { validatePromo } from "../api/promos";
 
 const ID_TYPES = ["Aadhaar", "PAN", "Passport", "DrivingLicense"];
 
+const COUNTRY_CODES = [
+  { code: "+91", country: "India" },
+  { code: "+1", country: "USA/Canada" },
+  { code: "+44", country: "UK" },
+  { code: "+971", country: "UAE" },
+  { code: "+61", country: "Australia" },
+  { code: "+65", country: "Singapore" },
+  { code: "+49", country: "Germany" },
+  { code: "+33", country: "France" },
+  { code: "+81", country: "Japan" },
+];
+
 export default function BookingPage() {
   const navigate = useNavigate();
   const store = useBookingStore();
@@ -24,9 +36,13 @@ export default function BookingPage() {
 
   const { roomData, checkIn, checkOut, nights, guestDetails, promoResult, step } = store;
 
+  const [countryCode, setCountryCode] = useState("+91");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [errors, setErrors] = useState({});
+
   // Step 2 — Create booking mutation
   const bookingMutation = useMutation({
-    mutationFn: createBooking,
+    mutationFn: (data) => createBooking({ ...data, phone: countryCode + phoneNumber }),
     onSuccess: (data) => {
       store.setBooking(data.id, data.reference);
       store.setStep(3);
@@ -35,13 +51,48 @@ export default function BookingPage() {
     onError: (err) => {
       const msg = err.response?.data;
       if (typeof msg === "string") toast.error(msg);
-      else if (msg?.non_field_errors) toast.error(msg.non_field_errors[0]);
-      else toast.error("Booking failed. Please try again.");
+      else if (msg) {
+        setErrors(msg);
+        if (msg.non_field_errors) toast.error(msg.non_field_errors[0]);
+        else toast.error("Please correct the errors in the form.");
+      } else {
+        toast.error("Booking failed. Please try again.");
+      }
     },
   });
 
+  const validate = () => {
+    const newErrors = {};
+    if (guestDetails.full_name.trim().length < 3) {
+      newErrors.full_name = "Name must be at least 3 characters.";
+    }
+    if (!phoneNumber.match(/^\d{10}$/)) {
+      newErrors.phone = "Phone must be exactly 10 digits.";
+    }
+    if (guestDetails.id_number.trim().length < 5) {
+      newErrors.id_number = "ID Number is too short.";
+    }
+    
+    // Aadhaar specific
+    if (guestDetails.id_type === "Aadhaar" && !guestDetails.id_number.match(/^\d{12}$/)) {
+      newErrors.id_number = "Aadhaar must be 12 digits.";
+    }
+    // PAN specific
+    if (guestDetails.id_type === "PAN" && !guestDetails.id_number.match(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)) {
+      newErrors.id_number = "PAN format invalid (ABCDE1234F).";
+    }
+
+    if (guestDetails.address.trim().length < 10) {
+      newErrors.address = "Address must be at least 10 characters.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleGuestSubmit = (e) => {
     e.preventDefault();
+    if (!validate()) return;
     const payload = {
       room_id: roomData.id,
       check_in: checkIn,
@@ -140,10 +191,14 @@ export default function BookingPage() {
                     required
                     type="text"
                     value={guestDetails.full_name}
-                    onChange={(e) => store.setGuestDetails({ ...guestDetails, full_name: e.target.value })}
-                    className="input-field"
+                    onChange={(e) => {
+                      store.setGuestDetails({ ...guestDetails, full_name: e.target.value });
+                      if (errors.full_name) setErrors({...errors, full_name: null});
+                    }}
+                    className={`input-field ${errors.full_name ? 'border-red-500' : ''}`}
                     placeholder="As on your ID"
                   />
+                  {errors.full_name && <p className="text-red-500 text-xs mt-1">{errors.full_name}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -153,23 +208,45 @@ export default function BookingPage() {
                     required
                     type="email"
                     value={guestDetails.email}
-                    onChange={(e) => store.setGuestDetails({ ...guestDetails, email: e.target.value })}
-                    className="input-field"
+                    onChange={(e) => {
+                      store.setGuestDetails({ ...guestDetails, email: e.target.value });
+                      if (errors.email) setErrors({...errors, email: null});
+                    }}
+                    className={`input-field ${errors.email ? 'border-red-500' : ''}`}
                     placeholder="Confirmation sent here"
                   />
+                  {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phone <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    required
-                    type="tel"
-                    value={guestDetails.phone}
-                    onChange={(e) => store.setGuestDetails({ ...guestDetails, phone: e.target.value })}
-                    className="input-field"
-                    placeholder="+91 XXXXX XXXXX"
-                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="input-field w-32 px-2 text-sm"
+                    >
+                      {COUNTRY_CODES.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.code} ({c.country})
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      required
+                      type="tel"
+                      pattern="[0-9]{10}"
+                      value={phoneNumber}
+                      onChange={(e) => {
+                        setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10));
+                        if (errors.phone) setErrors({...errors, phone: null});
+                      }}
+                      className={`input-field flex-1 ${errors.phone ? 'border-red-500' : ''}`}
+                      placeholder="9876543210"
+                    />
+                  </div>
+                  {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -206,10 +283,45 @@ export default function BookingPage() {
                     required
                     type="text"
                     value={guestDetails.id_number}
-                    onChange={(e) => store.setGuestDetails({ ...guestDetails, id_number: e.target.value })}
-                    className="input-field"
+                    onChange={(e) => {
+                      store.setGuestDetails({ ...guestDetails, id_number: e.target.value });
+                      if (errors.id_number) setErrors({...errors, id_number: null});
+                    }}
+                    className={`input-field ${errors.id_number ? 'border-red-500' : ''}`}
                     placeholder="Enter ID number"
                   />
+                  {errors.id_number && <p className="text-red-500 text-xs mt-1">{errors.id_number}</p>}
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    required
+                    rows={2}
+                    value={guestDetails.address}
+                    onChange={(e) => {
+                      store.setGuestDetails({ ...guestDetails, address: e.target.value });
+                      if (errors.address) setErrors({...errors, address: null});
+                    }}
+                    className={`input-field resize-none ${errors.address ? 'border-red-500' : ''}`}
+                    placeholder="Enter your full physical address"
+                  />
+                  {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+                </div>
+                <div className="sm:col-span-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="extra_bed"
+                      checked={guestDetails.extra_bed}
+                      onChange={(e) => store.setGuestDetails({ ...guestDetails, extra_bed: e.target.checked })}
+                      className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded cursor-pointer"
+                    />
+                    <label htmlFor="extra_bed" className="text-sm font-medium text-gray-700 cursor-pointer">
+                      Need an extra bed? (Check if yes)
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -260,6 +372,7 @@ export default function BookingPage() {
                 room={roomData}
                 nights={nights}
                 promoResult={promoResult}
+                extraBed={guestDetails.extra_bed}
               />
 
               <div className="flex gap-3 pt-2">

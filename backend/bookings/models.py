@@ -4,6 +4,8 @@ from django.db import models
 from django.utils import timezone
 
 
+from .invoice_model import Invoice
+
 class Booking(models.Model):
     class Status(models.TextChoices):
         PENDING = "Pending", "Pending"
@@ -32,6 +34,11 @@ class Booking(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     razorpay_order_id = models.CharField(max_length=100, blank=True)
     payment_id = models.CharField(max_length=100, blank=True)
+    extra_bed = models.BooleanField(default=False)
+    guest_count = models.PositiveIntegerField(
+        default=1, 
+        help_text="Number of guests staying in the room (for admin records)"
+    )
     expires_at = models.DateTimeField(null=True, blank=True)
     special_requests = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -61,11 +68,14 @@ class Booking(models.Model):
         return qs.exists()
 
     @classmethod
-    def calculate_price(cls, room, check_in, check_out, promo=None):
+    def calculate_price(cls, room, check_in, check_out, promo=None, extra_bed=False):
         from settings_app.models import HotelSettings
 
         nights = (check_out - check_in).days
         base_amount = room.base_price * nights
+        
+        if extra_bed:
+            base_amount += Decimal("500.00") * nights
 
         discount_amount = Decimal("0")
         if promo and promo.is_valid():

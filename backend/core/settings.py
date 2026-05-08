@@ -49,7 +49,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -66,7 +66,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": dj_database_url.parse(
-        config("DATABASE_URL", default="postgres://rbms_user:rbms_password@localhost:5432/rbms_db"),
+        str(config("DATABASE_URL", default="postgres://rbms_user:rbms_password@localhost:5432/rbms_db")),
         conn_max_age=600,
     )
 }
@@ -104,7 +104,7 @@ SIMPLE_JWT = {
 
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
-    default="http://localhost:5173,http://localhost:5174",
+    default="http://localhost:5173,http://localhost:5174,http://localhost:5175",
     cast=Csv(),
 )
 CORS_ALLOW_CREDENTIALS = True

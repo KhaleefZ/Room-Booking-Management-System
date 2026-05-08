@@ -15,6 +15,8 @@ const useBookingStore = create((set) => ({
     phone: "",
     id_type: "Aadhaar",
     id_number: "",
+    address: "",
+    extra_bed: false,
     special_requests: "",
     guest_count: 1,
   },
@@ -47,6 +49,8 @@ const useBookingStore = create((set) => ({
       guestDetails: {
         full_name: "", email: "", phone: "",
         id_type: "Aadhaar", id_number: "",
+        address: "",
+        extra_bed: false,
         special_requests: "", guest_count: 1,
       },
       promoCode: "", promoResult: null, pricing: null,

@@ -1,7 +1,13 @@
 from rest_framework import serializers
-from .models import Booking
+from .models import Booking, Invoice
 from rooms.serializers import RoomListSerializer
 from guests.serializers import GuestListSerializer
+
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invoice
+        fields = "__all__"
 
 
 class BookingCreateSerializer(serializers.Serializer):
@@ -13,14 +19,40 @@ class BookingCreateSerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=20)
     id_type = serializers.ChoiceField(choices=["Aadhaar", "PAN", "Passport", "DrivingLicense"])
     id_number = serializers.CharField(max_length=50)
+    address = serializers.CharField()
+    extra_bed = serializers.BooleanField(default=False)
     special_requests = serializers.CharField(required=False, allow_blank=True, default="")
     guest_count = serializers.IntegerField(min_value=1, default=1)
     promo_code = serializers.CharField(required=False, allow_blank=True, default="")
 
     def validate(self, data):
         import datetime
+        import re
         from rooms.models import Room
         from promos.models import PromoCode
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        # ID Validation Logic
+        id_type = data.get("id_type")
+        id_number = data.get("id_number")
+        
+        if id_type == "Aadhaar":
+            if not re.fullmatch(r"^\d{12}$", id_number):
+                raise serializers.ValidationError({"id_number": "Aadhaar must be exactly 12 digits."})
+        elif id_type == "PAN":
+            if not re.fullmatch(r"^[A-Z]{5}[0-9]{4}[A-Z]{1}$", id_number):
+                raise serializers.ValidationError({"id_number": "PAN must be in format ABCDE1234F."})
+        elif id_type == "Passport":
+            if not re.fullmatch(r"^[A-Z][0-9]{7,8}$", id_number):
+                raise serializers.ValidationError({"id_number": "Passport must be 1 letter followed by 7-8 digits."})
+        elif id_type == "DrivingLicense":
+            if not re.fullmatch(r"^[A-Z]{2}[0-9]{13}$", id_number):
+                raise serializers.ValidationError({"id_number": "Driving License must be 15 characters total (e.g. TN0120100001234)."})
+
+        # Phone validation
+        phone = data.get("phone")
+        if not re.fullmatch(r"^\+\d{1,3}\d{10}$", phone):
+            raise serializers.ValidationError({"phone": "Phone must include country code followed by 10 digits (e.g., +919876543210)."})
 
         try:
             room = Room.objects.get(pk=data["room_id"], status="Available")
@@ -71,14 +103,23 @@ class BookingCreateSerializer(serializers.Serializer):
                 "phone": validated_data["phone"],
                 "id_type": validated_data["id_type"],
                 "id_number": validated_data["id_number"],
+                "address": validated_data["address"],
+                "extra_bed": validated_data["extra_bed"],
             },
         )
 
-        pricing = Booking.calculate_price(room, validated_data["check_in"], validated_data["check_out"], promo)
+        pricing = Booking.calculate_price(
+            room, 
+            validated_data["check_in"], 
+            validated_data["check_out"], 
+            promo,
+            extra_bed=validated_data.get("extra_bed", False)
+        )
 
         booking = Booking.objects.create(
             room=room,
             guest=guest,
+            guest_count=validated_data.get("guest_count", 1),
             check_in=validated_data["check_in"],
             check_out=validated_data["check_out"],
             nights=pricing["nights"],
@@ -89,6 +130,7 @@ class BookingCreateSerializer(serializers.Serializer):
             promo_code=promo,
             special_requests=validated_data.get("special_requests", ""),
             status=Booking.Status.PENDING,
+            extra_bed=validated_data["extra_bed"],
         )
 
         if promo:
@@ -117,20 +159,23 @@ class BookingListSerializer(serializers.ModelSerializer):
 class BookingDetailSerializer(serializers.ModelSerializer):
     room = RoomListSerializer(read_only=True)
     guest = GuestListSerializer(read_only=True)
+    invoice = InvoiceSerializer(read_only=True)
     reference = serializers.UUIDField()
     promo_code_str = serializers.CharField(source="promo_code.code", read_only=True, default=None)
 
     class Meta:
         model = Booking
         fields = [
-            "id", "reference", "room", "guest",
+            "id", "reference", "room", "guest", "guest_count",
             "check_in", "check_out", "nights",
             "base_amount", "discount_amount", "tax_amount", "total_amount",
             "promo_code_str", "status",
             "razorpay_order_id", "payment_id",
             "special_requests", "expires_at",
             "created_at", "updated_at",
+            "invoice",
         ]
+        read_only_fields = ["id", "reference", "nights", "base_amount", "discount_amount", "tax_amount", "total_amount", "created_at", "updated_at"]
 
 
 class BookingStatusUpdateSerializer(serializers.Serializer):

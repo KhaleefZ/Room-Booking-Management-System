@@ -7,7 +7,7 @@ class GuestListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Guest
-        fields = ["id", "full_name", "email", "phone", "created_at", "total_bookings"]
+        fields = ["id", "full_name", "email", "phone", "id_type", "id_number", "created_at", "total_bookings"]
 
     def get_total_bookings(self, obj):
         return obj.bookings.count()
@@ -21,7 +21,7 @@ class GuestSerializer(serializers.ModelSerializer):
         model = Guest
         fields = [
             "id", "full_name", "email", "phone",
-            "id_type", "id_number", "special_requests",
+            "id_type", "id_number", "address", "extra_bed", "special_requests",
             "created_at", "total_bookings", "booking_history",
         ]
 

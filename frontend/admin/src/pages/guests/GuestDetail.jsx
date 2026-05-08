@@ -1,9 +1,10 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getGuest } from "../../api/guests";
 import StatusBadge from "../../components/ui/StatusBadge";
 import Spinner from "../../components/ui/Spinner";
-import { Link } from "react-router-dom";
+import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 export default function GuestDetail() {
   const { id } = useParams();
@@ -14,73 +15,166 @@ export default function GuestDetail() {
     queryFn: () => getGuest(id),
   });
 
-  if (isLoading) return <Spinner className="py-16" />;
-  if (!guest) return <p className="text-gray-400">Guest not found.</p>;
+  if (isLoading) return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
+      <Spinner size="lg" />
+      <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] animate-pulse">Retrieving Guest Portfolio...</p>
+    </div>
+  );
 
-  const Row = ({ label, value }) => (
-    <div className="flex justify-between py-2.5 border-b border-gray-50 last:border-0">
-      <span className="text-sm text-gray-500">{label}</span>
-      <span className="text-sm font-medium text-gray-900">{value}</span>
+  if (!guest) return (
+    <div className="py-20 text-center">
+      <div className="text-6xl mb-4">👤</div>
+      <p className="text-gray-900 font-black text-xl text-uppercase tracking-widest">Entry Error</p>
+      <button onClick={() => navigate("/guests")} className="mt-4 text-brand-600 font-bold hover:underline uppercase text-xs tracking-widest">Return to Registry</button>
+    </div>
+  );
+
+  const Row = ({ label, value, highlight = false }) => (
+    <div className="flex justify-between items-center py-4 border-b border-gray-50 last:border-0 group">
+      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">{label}</span>
+      <span className={`text-sm font-black tracking-tight ${highlight ? 'text-brand-600' : 'text-gray-900'}`}>{value}</span>
     </div>
   );
 
   return (
-    <div className="max-w-3xl space-y-5">
-      <div className="flex items-center gap-4">
-        <button onClick={() => navigate("/guests")} className="btn-secondary">← Back</button>
-        <div>
-          <h2 className="font-semibold text-gray-900">{guest.full_name}</h2>
-          <p className="text-xs text-gray-400 mt-0.5">{guest.email}</p>
+    <div className="max-w-5xl mx-auto space-y-8 pb-20">
+      {/* Upper Registry Deck */}
+      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-gray-50 rounded-bl-full -mr-24 -mt-24 opacity-60" />
+        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex items-center gap-5">
+            <button 
+              onClick={() => navigate("/guests")} 
+              className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-50 text-gray-400 hover:bg-gray-900 hover:text-white transition-all shadow-sm"
+            >
+              ←
+            </button>
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 rounded-[1.5rem] bg-gray-900 text-white flex items-center justify-center text-xl font-black shadow-xl shadow-gray-200">
+                {guest.first_name?.[0]}{guest.last_name?.[0]}
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-gray-900 tracking-tighter uppercase mb-0.5">
+                  {guest.full_name}
+                </h1>
+                <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">Member since {guest.created_at ? format(new Date(guest.created_at), "MMMM yyyy") : "N/A"}</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <div className="px-5 py-2.5 bg-brand-50 rounded-2xl border border-brand-100 text-center">
+               <span className="block text-[8px] font-black text-brand-400 uppercase mb-0.5">Booking Count</span>
+               <span className="text-lg font-black text-brand-600 leading-none">{guest.total_bookings}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="card p-5">
-          <h3 className="font-semibold text-gray-900 mb-3">Guest Information</h3>
-          <Row label="Full Name" value={guest.full_name} />
-          <Row label="Email" value={guest.email} />
-          <Row label="Phone" value={guest.phone} />
-          <Row label="ID Type" value={guest.id_type} />
-          <Row label="ID Number" value={guest.id_number} />
-          <Row label="Total Bookings" value={guest.total_bookings} />
-          <Row label="Registered" value={guest.created_at?.slice(0, 10)} />
-          {guest.special_requests && (
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-500 font-medium mb-1">Special Requests</p>
-              <p className="text-sm text-gray-700">{guest.special_requests}</p>
-            </div>
-          )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Core Records */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+             <div className="flex items-center gap-3 mb-8">
+                <div className="w-8 h-8 rounded-xl bg-gray-900 text-white flex items-center justify-center text-xs">📄</div>
+                <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Guest Specification</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
+                <div className="space-y-1">
+                   <Row label="Legal Name" value={guest.full_name} />
+                   <Row label="Global Email" value={guest.email} />
+                   <Row label="Contact Channel" value={guest.phone} />
+                </div>
+                <div className="space-y-1">
+                   <Row label="Identity Mode" value={guest.id_type} />
+                   <Row label="Serial Number" value={guest.id_number} highlight />
+                   <Row label="Registry Status" value="Verified Account" />
+                </div>
+              </div>
+
+              {guest.special_requests && (
+                <div className="mt-8 p-6 bg-amber-50 rounded-3xl border border-amber-100">
+                  <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest block mb-2">Guest Preferences</span>
+                  <p className="text-sm text-amber-900 font-medium italic">"{guest.special_requests}"</p>
+                </div>
+              )}
+          </div>
+
+          {/* Booking History Archive */}
+          <div className="space-y-4">
+             <div className="flex items-center gap-3 px-4">
+                <div className="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-[10px]">🗓️</div>
+                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Transaction History</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {guest.booking_history?.length > 0 ? (
+                  guest.booking_history.map((b) => (
+                    <Link
+                      key={b.id}
+                      to={`/bookings/${b.id}`}
+                      className="group bg-white p-6 rounded-[2rem] border border-gray-100 hover:border-brand-500 transition-all hover:shadow-xl hover:shadow-brand-100"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">REFERENCE</p>
+                          <p className="text-xs font-black text-gray-900">{String(b.reference || "N/A").slice(0, 8).toUpperCase()}</p>
+                        </div>
+                        <StatusBadge status={b.status} className="scale-75 origin-right" />
+                      </div>
+                      
+                      <div className="flex items-end justify-between">
+                         <div>
+                            <p className="text-[10px] font-bold text-gray-600 mb-1">Room {b.room_number || "TBD"} · {b.nights || 0}n</p>
+                            <p className="text-[10px] text-gray-400 font-medium">
+                              {b.check_in ? format(new Date(b.check_in), "dd MMM") : "N/A"} → {b.check_out ? format(new Date(b.check_out), "dd MMM") : "N/A"}
+                            </p>
+                         </div>
+                         <div className="text-right">
+                            <p className="text-sm font-black text-gray-900">₹{Number(b.total_amount || 0).toLocaleString()}</p>
+                         </div>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="col-span-2 p-12 text-center bg-gray-50 rounded-[2rem] border border-dashed border-gray-200">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No Historical Records Found</p>
+                  </div>
+                )}
+              </div>
+          </div>
         </div>
 
-        <div className="card p-5">
-          <h3 className="font-semibold text-gray-900 mb-3">
-            Booking History ({guest.total_bookings})
-          </h3>
-          <div className="space-y-3">
-            {guest.booking_history?.length > 0 ? (
-              guest.booking_history.map((b) => (
-                <Link
-                  key={b.id}
-                  to={`/bookings/${b.id}`}
-                  className="block p-3 bg-gray-50 rounded-lg hover:bg-brand-50 transition-colors"
+        {/* Action Sidebar */}
+        <div className="space-y-6">
+           <div className="bg-brand-600 p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity" />
+              <div className="relative z-10">
+                <h4 className="text-lg font-black tracking-tight mb-2">Concierge Suite</h4>
+                <p className="text-brand-100 text-xs font-medium leading-relaxed mb-6">Access priority handling tools for this guest's future reservations.</p>
+                <div className="flex items-center gap-3 mb-6">
+                   <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                   <span className="text-[10px] font-black uppercase tracking-[0.2em]">Verified Loyalty</span>
+                </div>
+                <button 
+                  className="w-full py-4 rounded-2xl bg-white text-brand-600 text-[10px] font-black uppercase tracking-widest hover:bg-brand-50 transition-all shadow-lg"
+                  onClick={() => navigate("/bookings", { state: { guestFilter: guest.full_name } })}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-xs text-gray-400">
-                      {String(b.reference).slice(0, 8).toUpperCase()}
-                    </span>
-                    <StatusBadge status={b.status} />
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">{b.room_number} · {b.nights}n</span>
-                    <span className="font-medium">₹{Number(b.total_amount).toLocaleString()}</span>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">{b.check_in} → {b.check_out}</p>
-                </Link>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm">No bookings yet.</p>
-            )}
-          </div>
+                  Create New Booking
+                </button>
+              </div>
+           </div>
+
+           <div className="bg-gray-950 p-8 rounded-[2.5rem] text-white shadow-xl">
+              <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-4">Danger Zone</span>
+              <button 
+                className="w-full py-3 rounded-xl border border-rose-900/50 text-rose-500 text-[10px] font-black uppercase tracking-widest hover:bg-rose-950/30 transition-all"
+                onClick={() => toast.error("Archival restricted for active profiles.")}
+              >
+                Restrict Profile
+              </button>
+           </div>
         </div>
       </div>
     </div>
