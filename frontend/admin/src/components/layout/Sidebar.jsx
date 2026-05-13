@@ -3,13 +3,13 @@ import useAuthStore from "../../store/authStore";
 import toast from "react-hot-toast";
 
 const NAV = [
-  { to: "/", icon: "📊", label: "Intelligence", sub: "Terminal" },
-  { to: "/rooms", icon: "🏨", label: "Inventory", sub: "Suites" },
-  { to: "/bookings", icon: "📅", label: "Operations", sub: "Ledger" },
-  { to: "/guests", icon: "👥", label: "Accounts", sub: "Patrons" },
+  { to: "/", icon: "📊", label: "Dashboard", sub: "Logistics" },
+  { to: "/rooms", icon: "🏨", label: "Inventory", sub: "Rooms" },
+  { to: "/bookings", icon: "📅", label: "Bookings", sub: "Ledger" },
+  { to: "/guests", icon: "👥", label: "Accounts", sub: "Guest Accounts" },
   { to: "/promos", icon: "🎟️", label: "Marketing", sub: "Access Tokens" },
-  { to: "/reports", icon: "📈", label: "Analytics", sub: "Telemetry" },
-  { to: "/settings", icon: "⚙️", label: "Control", sub: "Configuration" },
+  { to: "/reports", icon: "📈", label: "Analytics", sub: "Audit" },
+  { to: "/settings", icon: "⚙️", label: "Settings", sub: "Configuration" },
 ];
 
 export default function Sidebar() {
@@ -88,7 +88,7 @@ export default function Sidebar() {
               🚪
             </div>
             <div className="text-left">
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest group-hover:text-red-400 transition-colors">Terminate</p>
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest group-hover:text-red-400 transition-colors">Logout</p>
               <p className="text-[9px] font-bold text-slate-600">Secure Exit</p>
             </div>
           </button>

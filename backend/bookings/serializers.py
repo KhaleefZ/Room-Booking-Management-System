@@ -30,24 +30,26 @@ class BookingCreateSerializer(serializers.Serializer):
         import re
         from rooms.models import Room
         from promos.models import PromoCode
+        from guests.utils import validate_aadhaar
         from django.core.exceptions import ValidationError as DjangoValidationError
 
         # ID Validation Logic
         id_type = data.get("id_type")
-        id_number = data.get("id_number")
+        id_number = data.get("id_number", "").strip().upper()
+        data["id_number"] = id_number # Normalize to uppercase
         
         if id_type == "Aadhaar":
-            if not re.fullmatch(r"^\d{12}$", id_number):
-                raise serializers.ValidationError({"id_number": "Aadhaar must be exactly 12 digits."})
+            if not validate_aadhaar(id_number):
+                raise serializers.ValidationError({"id_number": "Invalid Aadhaar number. Please check the digits."})
         elif id_type == "PAN":
             if not re.fullmatch(r"^[A-Z]{5}[0-9]{4}[A-Z]{1}$", id_number):
                 raise serializers.ValidationError({"id_number": "PAN must be in format ABCDE1234F."})
         elif id_type == "Passport":
-            if not re.fullmatch(r"^[A-Z][0-9]{7,8}$", id_number):
-                raise serializers.ValidationError({"id_number": "Passport must be 1 letter followed by 7-8 digits."})
+            if not re.fullmatch(r"^[A-Z][1-9]\d{6}$", id_number):
+                raise serializers.ValidationError({"id_number": "Passport must be 1 letter followed by 7 digits."})
         elif id_type == "DrivingLicense":
-            if not re.fullmatch(r"^[A-Z]{2}[0-9]{13}$", id_number):
-                raise serializers.ValidationError({"id_number": "Driving License must be 15 characters total (e.g. TN0120100001234)."})
+            if not re.fullmatch(r"^[A-Z]{2}[0-9A-Z]{13}$", id_number):
+                raise serializers.ValidationError({"id_number": "Driving License must be 15 characters total."})
 
         # Phone validation
         phone = data.get("phone")

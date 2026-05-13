@@ -7,7 +7,7 @@ from .models import Guest
 from .serializers import GuestSerializer, GuestListSerializer
 
 
-class GuestViewSet(viewsets.ReadOnlyModelViewSet):
+class GuestViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ["full_name", "email", "phone"]

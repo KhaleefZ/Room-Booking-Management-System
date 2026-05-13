@@ -6,7 +6,9 @@ import useBookingStore from "../store/bookingStore";
 import BookingSteps from "../components/ui/BookingSteps";
 import PriceBreakdown from "../components/ui/PriceBreakdown";
 import { createBooking, createPaymentOrder, verifyPayment } from "../api/bookings";
+import { checkIdExists } from "../api/guests";
 import { validatePromo } from "../api/promos";
+import { validateAadhaar, validatePAN, validatePassport } from "../utils/validators";
 
 const ID_TYPES = ["Aadhaar", "PAN", "Passport", "DrivingLicense"];
 
@@ -38,6 +40,7 @@ export default function BookingPage() {
 
   const [countryCode, setCountryCode] = useState("+91");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [idChecking, setIdChecking] = useState(false);
   const [errors, setErrors] = useState({});
 
   // Step 2 — Create booking mutation
@@ -69,17 +72,26 @@ export default function BookingPage() {
     if (!phoneNumber.match(/^\d{10}$/)) {
       newErrors.phone = "Phone must be exactly 10 digits.";
     }
-    if (guestDetails.id_number.trim().length < 5) {
+    
+    const idVal = guestDetails.id_number.trim().toUpperCase();
+
+    if (idVal.length < 5) {
       newErrors.id_number = "ID Number is too short.";
     }
     
     // Aadhaar specific
-    if (guestDetails.id_type === "Aadhaar" && !guestDetails.id_number.match(/^\d{12}$/)) {
-      newErrors.id_number = "Aadhaar must be 12 digits.";
+    if (guestDetails.id_type === "Aadhaar" && !validateAadhaar(idVal)) {
+      newErrors.id_number = "Invalid Aadhaar number (Check digits or checksum).";
     }
+    
     // PAN specific
-    if (guestDetails.id_type === "PAN" && !guestDetails.id_number.match(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)) {
+    if (guestDetails.id_type === "PAN" && !validatePAN(idVal)) {
       newErrors.id_number = "PAN format invalid (ABCDE1234F).";
+    }
+
+    // Passport specific
+    if (guestDetails.id_type === "Passport" && !validatePassport(idVal)) {
+      newErrors.id_number = "Passport format invalid (e.g., Z1234567).";
     }
 
     if (guestDetails.address.trim().length < 10) {
@@ -90,14 +102,32 @@ export default function BookingPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleGuestSubmit = (e) => {
+  const handleGuestSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+
+    // Phase 3: Duplicate Check
+    setIdChecking(true);
+    try {
+      const { exists } = await checkIdExists(guestDetails.id_number.trim().toUpperCase());
+      if (exists) {
+        toast.error("An account with this ID already exists. Please contact support or use a different email/ID.");
+        setErrors(prev => ({ ...prev, id_number: "Already registered." }));
+        setIdChecking(false);
+        return;
+      }
+    } catch (err) {
+      console.error("ID verification failed", err);
+    } finally {
+      setIdChecking(false);
+    }
+
     const payload = {
       room_id: roomData.id,
       check_in: checkIn,
       check_out: checkOut,
       ...guestDetails,
+      id_number: guestDetails.id_number.trim().toUpperCase(),
       promo_code: store.promoCode || "",
     };
     bookingMutation.mutate(payload);
@@ -385,10 +415,10 @@ export default function BookingPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={bookingMutation.isPending}
-                  className="btn-primary flex-1"
+                  disabled={bookingMutation.isPending || idChecking}
+                  className="btn-primary flex-1 disabled:opacity-50"
                 >
-                  {bookingMutation.isPending ? "Processing..." : "Proceed to Payment"}
+                  {idChecking ? "Verifying..." : bookingMutation.isPending ? "Processing..." : "Proceed to Payment"}
                 </button>
               </div>
             </form>

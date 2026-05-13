@@ -3,15 +3,20 @@ from django.utils import timezone
 
 
 class Amenity(models.Model):
+    AMENITY_TYPE_CHOICES = [
+        ('General', 'General'),
+        ('Technical', 'Technical'),
+    ]
     name = models.CharField(max_length=100, unique=True)
     icon = models.CharField(max_length=50, blank=True)
+    amenity_type = models.CharField(max_length=20, choices=AMENITY_TYPE_CHOICES, default='General')
 
     class Meta:
         verbose_name_plural = "amenities"
-        ordering = ["name"]
+        ordering = ["amenity_type", "name"]
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.amenity_type})"
 
 
 class Room(models.Model):

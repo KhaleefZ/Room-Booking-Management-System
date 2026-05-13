@@ -24,6 +24,9 @@ export default function GuestList() {
           <p className="text-sm text-gray-400 font-medium">Manage and search your customers</p>
         </div>
         <div className="flex gap-2">
+           <Link to="/guests/new" className="btn-primary px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl">
+            Register Guest
+          </Link>
            <span className="text-xs font-bold bg-brand-50 text-brand-600 px-4 py-2 rounded-full h-fit self-center">
             {guests.length} TOTAL GUESTS
           </span>

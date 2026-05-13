@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getRevenueReport, getOccupancyReport } from "../../api/reports";
+import { getRevenueReport, getOccupancyReport, exportCSV } from "../../api/reports";
 import { format, startOfMonth, parseISO } from "date-fns";
 import Spinner from "../../components/ui/Spinner";
 import {
@@ -37,6 +37,21 @@ export default function Reports() {
     enabled: !!from && !!to,
     retry: 1
   });
+
+  const handleExport = async () => {
+    try {
+      const blob = await exportCSV(from, to);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `report_${from}_to_${to}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
+  };
 
   if (isRevError || isOccError) {
     return (
@@ -113,7 +128,10 @@ export default function Reports() {
               <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="bg-transparent border-none text-[10px] font-black uppercase text-white outline-none w-32" />
               <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="bg-transparent border-none text-[10px] font-black uppercase text-white outline-none w-32" />
            </div>
-           <button className="px-8 py-5 bg-white text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-50 transition-all flex items-center gap-3">
+           <button 
+             onClick={handleExport}
+             className="px-8 py-5 bg-white text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-50 transition-all flex items-center gap-3"
+           >
              <Download size={14} /> Export
            </button>
         </div>

@@ -24,13 +24,18 @@ class HotelSettings(models.Model):
     )
     admin_email_template = models.TextField(
         default=(
-            "New Booking Alert!\n\n"
-            "Reference: {{booking_reference}}\n"
-            "Guest: {{guest_name}}\n"
-            "Room: {{room_name}}\n"
-            "Check-in: {{check_in}}\n"
-            "Check-out: {{check_out}}\n"
-            "Total: \u20b9{{total_amount}}"
+            "<div style='border-left: 4px solid #4f46e5; padding-left: 15px;'>\n"
+            "<p style='font-size: 11px; font-weight: 800; color: #6366f1; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 5px;'>System Notification: New Core Transaction</p>\n"
+            "<h2 style='font-size: 20px; font-weight: 900; color: #0f172a; margin-top: 0;'>New Reservation Logged</h2>\n"
+            "<div style='margin-top: 20px;'>\n"
+            "   <p><strong>REFERENCE ID:</strong> {{booking_reference}}</p>\n"
+            "   <p><strong>PRINCIPAL GUEST:</strong> {{guest_name}}</p>\n"
+            "   <p><strong>INVENTORY UNIT:</strong> {{room_name}}</p>\n"
+            "   <p><strong>SCHEDULE:</strong> {{check_in}} to {{check_out}}</p>\n"
+            "   <p><strong>VALUATION:</strong> \u20b9{{total_amount}}</p>\n"
+            "</div>\n"
+            "<p style='font-size: 12px; color: #64748b; margin-top: 25px; font-style: italic;'>Action Required: Verify transaction liquidity and update occupancy logs.</p>\n"
+            "</div>"
         )
     )
     admin_email_address = models.EmailField(default="admin@hotel.com")

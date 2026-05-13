@@ -16,6 +16,7 @@ class RoomPhotoSerializer(serializers.ModelSerializer):
 
 class RoomListSerializer(serializers.ModelSerializer):
     primary_photo = serializers.SerializerMethodField()
+    photos = RoomPhotoSerializer(many=True, read_only=True)
     amenity_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -23,7 +24,7 @@ class RoomListSerializer(serializers.ModelSerializer):
         fields = [
             "id", "room_number", "room_type", "floor",
             "bed_config", "capacity", "base_price", "status",
-            "primary_photo", "amenity_count", "extra_bed", "address",
+            "primary_photo", "photos", "amenity_count", "extra_bed", "address",
         ]
 
     def get_primary_photo(self, obj):

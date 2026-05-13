@@ -24,15 +24,19 @@ export const getAmenities = () =>
 export const createAmenity = (data) =>
   client.post("/rooms/amenities/", data).then((r) => r.data);
 
-export const uploadRoomPhoto = (id, file) => {
+export const uploadRoomPhoto = (id, file, isPrimary = false) => {
   const form = new FormData();
   form.append("image", file);
+  if (isPrimary) form.append("is_primary", "true");
   return client
     .post(`/rooms/${id}/photos/`, form, {
       headers: { "Content-Type": "multipart/form-data" },
     })
     .then((r) => r.data);
 };
+
+export const setPrimaryPhoto = (roomId, photoId) =>
+  client.patch(`/rooms/${roomId}/photos/${photoId}/`, { is_primary: true }).then((r) => r.data);
 
 export const deleteRoomPhoto = (roomId, photoId) =>
   client.delete(`/rooms/${roomId}/photos/${photoId}/`).then((r) => r.data);

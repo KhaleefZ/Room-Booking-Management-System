@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getRoom, createRoom, updateRoom,
   getAmenities, createAmenity,
-  uploadRoomPhoto, deleteRoomPhoto,
+  uploadRoomPhoto, deleteRoomPhoto, setPrimaryPhoto
 } from "../../api/rooms";
 import Spinner from "../../components/ui/Spinner";
 import toast from "react-hot-toast";
@@ -42,6 +42,7 @@ export default function RoomForm() {
   });
   const [photoFile, setPhotoFile] = useState(null);
   const [photoUploading, setPhotoUploading] = useState(false);
+  const [amenityDraft, setAmenityDraft] = useState({ name: "", icon: "" });
 
   const { data: room, isLoading: roomLoading } = useQuery({
     queryKey: ["room", id],
@@ -49,12 +50,54 @@ export default function RoomForm() {
     enabled: isEdit,
   });
 
+  const handleSetPrimary = async (photoId) => {
+    try {
+      await setPrimaryPhoto(id, photoId);
+      toast.success("Cover image updated!");
+      qc.invalidateQueries(["room", id]);
+    } catch {
+      toast.error("Failed to update cover image.");
+    }
+  };
+
   const { data: amenitiesData } = useQuery({
     queryKey: ["amenities"],
     queryFn: getAmenities,
   });
 
   const amenities = amenitiesData?.results || [];
+
+  const createAmenityMutation = useMutation({
+    mutationFn: createAmenity,
+    onSuccess: (amenity) => {
+      toast.success("Technical amenity added!");
+      qc.invalidateQueries(["amenities"]);
+      setAmenityDraft({ name: "", icon: "" });
+      setForm((current) => ({
+        ...current,
+        amenity_ids: current.amenity_ids.includes(amenity.id)
+          ? current.amenity_ids
+          : [...current.amenity_ids, amenity.id],
+      }));
+    },
+    onError: (err) => {
+      const msg = err.response?.data;
+      toast.error(typeof msg === "object" ? JSON.stringify(msg) : "Failed to add amenity.");
+    },
+  });
+
+  const handleCreateAmenity = (e) => {
+    e.preventDefault();
+    const name = amenityDraft.name.trim();
+    const icon = amenityDraft.icon.trim();
+
+    if (!name) {
+      toast.error("Amenity name is required.");
+      return;
+    }
+
+    createAmenityMutation.mutate({ name, icon });
+  };
 
   useEffect(() => {
     if (room) {
@@ -100,7 +143,8 @@ export default function RoomForm() {
     if (!photoFile || !id) return;
     setPhotoUploading(true);
     try {
-      await uploadRoomPhoto(id, photoFile);
+      // Pass is_primary=false for manual uploads via this button
+      await uploadRoomPhoto(id, photoFile, false);
       toast.success("Photo uploaded!");
       qc.invalidateQueries(["room", id]);
       setPhotoFile(null);
@@ -175,12 +219,19 @@ export default function RoomForm() {
                     <img src={p.cloudinary_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
-                    {p.is_primary && (
+                    {p.is_primary ? (
                       <div className="absolute top-4 left-4">
                         <span className="bg-brand-500 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-2">
                           <CheckCircle2 size={10} /> Cover
                         </span>
                       </div>
+                    ) : (
+                      <button
+                        onClick={() => handleSetPrimary(p.id)}
+                        className="absolute top-4 left-4 bg-white/20 backdrop-blur-md text-white hover:bg-brand-600 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-300"
+                      >
+                        Set Cover
+                      </button>
                     )}
                     
                     <button
@@ -410,6 +461,37 @@ export default function RoomForm() {
                     </div>
                   </div>
                 )}
+
+                <form onSubmit={handleCreateAmenity} className="space-y-4 rounded-[2rem] border border-slate-100 bg-slate-50/70 p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Add Technical Amenity</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Create and attach instantly</p>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={createAmenityMutation.isPending}
+                      className="px-5 py-3 rounded-2xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-brand-600 transition-all disabled:opacity-50"
+                    >
+                      {createAmenityMutation.isPending ? "Adding..." : "Add Amenity"}
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      value={amenityDraft.name}
+                      onChange={(e) => setAmenityDraft((current) => ({ ...current, name: e.target.value }))}
+                      className="w-full bg-white border border-slate-200 rounded-[1.25rem] px-5 py-4 text-slate-900 font-bold focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500 transition-all outline-none"
+                      placeholder="e.g. Ocean View"
+                    />
+                    <input
+                      value={amenityDraft.icon}
+                      onChange={(e) => setAmenityDraft((current) => ({ ...current, icon: e.target.value }))}
+                      className="w-full bg-white border border-slate-200 rounded-[1.25rem] px-5 py-4 text-slate-900 font-bold focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500 transition-all outline-none"
+                      placeholder="Icon or short label"
+                    />
+                  </div>
+                </form>
               </div>
             </section>
 

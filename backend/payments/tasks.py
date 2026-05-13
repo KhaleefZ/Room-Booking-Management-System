@@ -121,55 +121,61 @@ def send_booking_confirmation(booking_id: int):
         }
 
         confirmation_html = f"""
-        <div style="text-align: center; margin-bottom: 30px;">
-            <div style="display: inline-block; padding: 8px 16px; background-color: #ecfdf5; border-radius: 99px; margin-bottom: 16px;">
-                <span style="color: #059669; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">✓ Reservation Confirmed</span>
+        <div style="text-align: center; margin-bottom: 35px;">
+            <div style="display: inline-block; padding: 10px 20px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 99px; margin-bottom: 20px;">
+                <span style="color: #15803d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em;">Official Reservation Confirmation</span>
             </div>
-            <h1 style="color: #0f172a; margin: 0; font-size: 28px; font-weight: 900; tracking: tight;">See you soon!</h1>
-            <p style="color: #64748b; margin-top: 8px; font-size: 15px;">Your stay at {hotel_name} is fully booked and confirmed.</p>
+            <h1 style="color: #0f172a; margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -0.04em;">Your Stay is Confirmed.</h1>
+            <p style="color: #64748b; margin-top: 12px; font-size: 16px; line-height: 1.5; font-weight: 500;">Dear {context['guest_name']}, your upcoming reservation at <span style="color: #0f172a; font-weight: 700;">{hotel_name}</span> has been successfully authenticated and secured.</p>
         </div>
 
-        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 25px;">
-            <div style="background-color: #f8fafc; padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <span style="display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Booking Reference</span>
-                    <span style="font-size: 18px; font-weight: 900; color: #4f46e5;">#{context['booking_reference']}</span>
+        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <div style="background-color: #f8fafc; padding: 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                <div style="width: 100%;">
+                    <span style="display: block; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 4px;">System Reference Number</span>
+                    <span style="font-size: 22px; font-weight: 900; color: #4f46e5; letter-spacing: 0.05em;">{context['booking_reference']}</span>
                 </div>
             </div>
             
-            <div style="padding: 24px;">
-                <div style="display: flex; gap: 20px; margin-bottom: 24px;">
+            <div style="padding: 30px;">
+                <div style="display: flex; gap: 30px; margin-bottom: 30px;">
                     <div style="flex: 1;">
-                        <span style="display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Check-In Date</span>
-                        <span style="display: block; font-size: 15px; font-weight: 700; color: #1e293b; margin-top: 4px;">{context['check_in']}</span>
-                        <span style="display: block; font-size: 12px; color: #64748b; margin-top: 2px;">at {context['check_in_time']}</span>
+                        <span style="display: block; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Check-In Protocol</span>
+                        <span style="display: block; font-size: 16px; font-weight: 800; color: #1e293b; margin-top: 6px;">{context['check_in']}</span>
+                        <span style="display: block; font-size: 13px; font-weight: 600; color: #6366f1; margin-top: 4px;">Entry from {context['check_in_time']}</span>
                     </div>
                     <div style="flex: 1; text-align: right;">
-                        <span style="display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Check-Out Date</span>
-                        <span style="display: block; font-size: 15px; font-weight: 700; color: #1e293b; margin-top: 4px;">{context['check_out']}</span>
-                        <span style="display: block; font-size: 12px; color: #64748b; margin-top: 2px;">at {context['check_out_time']}</span>
+                        <span style="display: block; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Check-Out Protocol</span>
+                        <span style="display: block; font-size: 16px; font-weight: 800; color: #1e293b; margin-top: 6px;">{context['check_out']}</span>
+                        <span style="display: block; font-size: 13px; font-weight: 600; color: #6366f1; margin-top: 4px;">Vacate by {context['check_out_time']}</span>
                     </div>
                 </div>
 
-                <div style="padding-top: 20px; border-top: 1px dashed #e2e8f0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                        <span style="color: #64748b; font-size: 14px;">Room Unit</span>
-                        <span style="color: #1e293b; font-size: 14px; font-weight: 700;">{context['room_name']} ({context['room_type']})</span>
+                <div style="padding-top: 25px; border-top: 1px solid #f1f5f9;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                        <span style="color: #64748b; font-size: 14px; font-weight: 600;">Inventory Allocated</span>
+                        <span style="color: #0f172a; font-size: 14px; font-weight: 800;">{context['room_name']} <span style="font-size: 12px; color: #64748b; font-weight: 500;">({context['room_type']})</span></span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                        <span style="color: #64748b; font-size: 14px;">Guest Name</span>
-                        <span style="color: #1e293b; font-size: 14px; font-weight: 700;">{context['guest_name']}</span>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                        <span style="color: #64748b; font-size: 14px; font-weight: 600;">Primary Occupant</span>
+                        <span style="color: #0f172a; font-size: 14px; font-weight: 800;">{context['guest_name']}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding-top: 12px; margin-top: 12px; border-top: 1px solid #f1f5f9;">
-                        <span style="color: #0f172a; font-size: 16px; font-weight: 800;">Total Paid</span>
-                        <span style="color: #4f46e5; font-size: 18px; font-weight: 900;">{context['total_amount']}</span>
+                    <div style="display: flex; justify-content: space-between; padding-top: 20px; margin-top: 20px; border-top: 2px solid #f8fafc;">
+                        <span style="color: #0f172a; font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">Total Settlement</span>
+                        <span style="color: #4f46e5; font-size: 22px; font-weight: 900;">{context['total_amount']}</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div style="text-align: center; color: #64748b; font-size: 13px; line-height: 1.5;">
-            <p>If you need to modify your reservation or have special requests, please contact our support team or reply directly to this email.</p>
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 30px;">
+            <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.6;">
+                <strong>Note to Guest:</strong> Professional credentials and identification are required at the point of entry. To modify this protocol, please reach out to our Guest Relations desk.
+            </p>
+        </div>
+
+        <div style="text-align: center; color: #94a3b8; font-size: 12px; line-height: 1.6;">
+            <p>Thank you for choosing RBMS Executive Services. This is a system-generated secure transmission.</p>
         </div>
         """
 
@@ -177,7 +183,7 @@ def send_booking_confirmation(booking_id: int):
         text_body = strip_tags(html_body)
 
         msg = EmailMultiAlternatives(
-            subject=f"CONFIRMED: Stay Record {context['booking_reference']} — RBMS",
+            subject=f"RESERVATION CONFIRMED: Log {context['booking_reference']} — {hotel_name}",
             body=text_body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[booking.guest.email],
@@ -214,7 +220,7 @@ def send_admin_notification(booking_id: int):
         text_body = strip_tags(html_body)
 
         msg = EmailMultiAlternatives(
-            subject=f"New Log: {booking.guest.full_name} | Ref {context['booking_reference']}",
+            subject=f"CORE LOG: {booking.guest.full_name.upper()} | REF {context['booking_reference']}",
             body=text_body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[hotel_settings.admin_email_address],

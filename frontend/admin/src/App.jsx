@@ -9,6 +9,7 @@ import BookingForm from "./pages/bookings/BookingForm";
 import BookingDetail from "./pages/bookings/BookingDetail";
 import GuestList from "./pages/guests/GuestList";
 import GuestDetail from "./pages/guests/GuestDetail";
+import GuestForm from "./pages/guests/GuestForm";
 import Reports from "./pages/reports/Reports";
 import Promos from "./pages/Promos";
 import Settings from "./pages/Settings";
@@ -26,7 +27,9 @@ export default function App() {
         <Route path="/bookings/new" element={<BookingForm />} />
         <Route path="/bookings/:id" element={<BookingDetail />} />
         <Route path="/guests" element={<GuestList />} />
+        <Route path="/guests/new" element={<GuestForm />} />
         <Route path="/guests/:id" element={<GuestDetail />} />
+        <Route path="/guests/:id/edit" element={<GuestForm />} />
         <Route path="/promos" element={<Promos />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />

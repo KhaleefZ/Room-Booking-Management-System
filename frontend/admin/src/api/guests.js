@@ -5,3 +5,9 @@ export const getGuests = (params) =>
 
 export const getGuest = (id) =>
   client.get(`/guests/${id}/`).then((r) => r.data);
+
+export const createGuest = (data) =>
+  client.post("/guests/", data).then((r) => r.data);
+
+export const updateGuest = (id, data) =>
+  client.put(`/guests/${id}/`, data).then((r) => r.data);

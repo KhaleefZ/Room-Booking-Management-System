@@ -63,6 +63,12 @@ export default function GuestDetail() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Link 
+              to={`/guests/${id}/edit`}
+              className="px-6 py-2.5 bg-gray-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 self-center"
+            >
+              Update Credentials
+            </Link>
             <div className="px-5 py-2.5 bg-brand-50 rounded-2xl border border-brand-100 text-center">
                <span className="block text-[8px] font-black text-brand-400 uppercase mb-0.5">Booking Count</span>
                <span className="text-lg font-black text-brand-600 leading-none">{guest.total_bookings}</span>

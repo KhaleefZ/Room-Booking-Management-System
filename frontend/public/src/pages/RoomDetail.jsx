@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getRoom } from "../api/rooms";
@@ -27,6 +27,10 @@ export default function RoomDetail() {
     setCheckOut(end);
   };
 
+  useEffect(() => {
+    setPhotoIdx(0);
+  }, [room?.id]);
+
   const handleBook = () => {
     if (!checkIn || !checkOut) {
       toast.error("Please select check-in and check-out dates.");
@@ -54,7 +58,12 @@ export default function RoomDetail() {
     </div>
   );
 
-  const photos = room.photos || [];
+  const photos = [...(room.photos || [])].sort((left, right) => {
+    if (left.is_primary === right.is_primary) {
+      return (left.order ?? 0) - (right.order ?? 0);
+    }
+    return left.is_primary ? -1 : 1;
+  });
   const displayPhoto = photos[photoIdx]?.cloudinary_url;
   const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
 

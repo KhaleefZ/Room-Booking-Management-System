@@ -43,6 +43,13 @@ class RoomViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    def _parse_bool(self, value):
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return False
+        return str(value).lower() in {"true", "1", "yes", "on"}
+
     @action(detail=True, methods=["patch"], permission_classes=[IsAuthenticated])
     def update_status(self, request, pk=None):
         room = self.get_object()
@@ -75,8 +82,13 @@ class RoomViewSet(viewsets.ModelViewSet):
     def upload_photo(self, request, pk=None):
         room = self.get_object()
         file = request.FILES.get("image")
+        is_primary = self._parse_bool(request.data.get("is_primary"))
+        
         if not file:
             return Response({"error": "No image file provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if is_primary:
+            room.photos.all().update(is_primary=False)
 
         result = cloudinary.uploader.upload(
             file,
@@ -87,10 +99,32 @@ class RoomViewSet(viewsets.ModelViewSet):
             room=room,
             cloudinary_url=result["secure_url"],
             public_id=result["public_id"],
-            is_primary=not room.photos.exists(),
+            is_primary=is_primary or not room.photos.exists(),
             order=room.photos.count(),
         )
         return Response(RoomPhotoSerializer(photo).data, status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=True, methods=["patch"],
+        permission_classes=[IsAuthenticated],
+        url_path="photos/(?P<photo_id>[0-9]+)",
+    )
+    def update_photo(self, request, pk=None, photo_id=None):
+        room = self.get_object()
+        try:
+            photo = room.photos.get(pk=photo_id)
+        except RoomPhoto.DoesNotExist:
+            return Response({"error": "Photo not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        is_primary = request.data.get("is_primary")
+        if is_primary is not None:
+            is_primary = self._parse_bool(is_primary)
+            if is_primary:
+                room.photos.all().update(is_primary=False)
+            photo.is_primary = is_primary
+            photo.save(update_fields=["is_primary"])
+            
+        return Response(RoomPhotoSerializer(photo).data)
 
     @action(
         detail=True, methods=["delete"],

@@ -9,9 +9,15 @@ export default function Gallery() {
   });
 
   const rooms = data?.results || [];
-  const photos = rooms.flatMap((r) =>
-    (r.primary_photo ? [{ url: r.primary_photo, room: `Room ${r.room_number} — ${r.room_type}` }] : [])
-  );
+  const photos = rooms.flatMap((room) => {
+    const roomLabel = `Room ${room.room_number} — ${room.room_type}`;
+    const roomPhotos = room.photos?.length
+      ? room.photos.map((photo) => ({ url: photo.cloudinary_url, room: roomLabel }))
+      : room.primary_photo
+        ? [{ url: room.primary_photo, room: roomLabel }]
+        : [];
+    return roomPhotos;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
