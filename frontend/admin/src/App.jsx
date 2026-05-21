@@ -13,6 +13,7 @@ import GuestForm from "./pages/guests/GuestForm";
 import Reports from "./pages/reports/Reports";
 import Promos from "./pages/Promos";
 import Settings from "./pages/Settings";
+import ContactMessages from "./pages/contacts/ContactMessages";
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/promos" element={<Promos />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/contacts" element={<ContactMessages />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

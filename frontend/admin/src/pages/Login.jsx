@@ -37,9 +37,9 @@ export default function Login() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">R</span>
+            <span className="text-white font-bold text-2xl">S</span>
           </div>
-          <h1 className="text-white font-bold text-2xl">RBMS Admin</h1>
+          <h1 className="text-white font-bold text-2xl">Sri ASK Residency</h1>
           <p className="text-gray-400 text-sm mt-1">Sign in to your dashboard</p>
         </div>
 
@@ -83,7 +83,7 @@ export default function Login() {
         </div>
 
         <p className="text-center text-gray-500 text-xs mt-6">
-          HaizoTech · RBMS v1.0
+          HaizoTech · Sri ASK Residency v1.0
         </p>
       </div>
     </div>

@@ -65,8 +65,13 @@ export default function Settings() {
             <h3 className="font-black text-slate-900 uppercase tracking-widest text-sm">Property Profile</h3>
           </div>
           <Field label="Business Name" name="hotel_name" icon="🏷️" />
-          <Field label="Admin Contact Email" name="admin_email_address" type="email" icon="📧"
-            hint="Primary address for all system alerts." />
+          <Field label="Property Address" name="hotel_address" icon="📍" />
+          <div className="grid grid-cols-2 gap-6">
+             <Field label="Contact Phone" name="hotel_phone" icon="📞" />
+             <Field label="Contact Email" name="hotel_email" type="email" icon="📧" />
+          </div>
+          <Field label="Admin Notification Email" name="admin_email_address" type="email" icon="🛡️"
+            hint="System alerts and internal notifications." />
           <div className="grid grid-cols-2 gap-6">
             <Field label="Default Check-In Time" name="check_in_time" type="time" icon="🕒" />
             <Field label="Default Check-Out Time" name="check_out_time" type="time" icon="🕘" />

@@ -54,6 +54,12 @@ class RevenueReportView(APIView):
         total_base = sum(row["base"] or 0 for row in data)
         total_discount = sum(row["discount"] or 0 for row in data)
         total_bookings = sum(row["booking_count"] for row in data)
+        
+        today = datetime.date.today()
+        today_bookings_count = Booking.objects.filter(
+            check_in=today,
+            status__in=CONFIRMED_STATUSES
+        ).count()
 
         return Response({
             "from": str(from_date),
@@ -63,8 +69,8 @@ class RevenueReportView(APIView):
             "total_base": total_base,
             "total_discount": total_discount,
             "total_bookings": total_bookings,
+            "today_bookings_count": today_bookings_count,
             "inventory": {
-                "total": Room.objects.count(),
                 "available": Room.objects.filter(status="Available").count(),
                 "occupied": Room.objects.filter(status="Occupied").count(),
                 "maintenance": Room.objects.filter(status__in=["Maintenance", "Cleaning"]).count(),
@@ -93,7 +99,8 @@ class OccupancyReportView(APIView):
         result = []
 
         for room in rooms:
-            bookings = room.bookings.filter(
+            bookings = Booking.objects.filter(
+                room=room,
                 status__in=CONFIRMED_STATUSES,
                 check_in__lte=to_date,
                 check_out__gt=from_date,
@@ -106,7 +113,7 @@ class OccupancyReportView(APIView):
 
             pct = round((occupied_nights / total_nights) * 100, 1) if total_nights else 0
             result.append({
-                "room_id": room.id,
+                "room_id": room.pk,
                 "room_number": room.room_number,
                 "room_type": room.room_type,
                 "occupied_nights": occupied_nights,

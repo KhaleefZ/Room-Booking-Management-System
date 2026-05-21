@@ -11,50 +11,79 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
 
 class BookingCreateSerializer(serializers.Serializer):
+    guest_id = serializers.IntegerField(required=False, allow_null=True)
     room_id = serializers.IntegerField()
     check_in = serializers.DateField()
     check_out = serializers.DateField()
-    full_name = serializers.CharField(max_length=200)
-    email = serializers.EmailField()
-    phone = serializers.CharField(max_length=20)
-    id_type = serializers.ChoiceField(choices=["Aadhaar", "PAN", "Passport", "DrivingLicense"])
-    id_number = serializers.CharField(max_length=50)
-    address = serializers.CharField()
+    full_name = serializers.CharField(max_length=200, required=False)
+    email = serializers.EmailField(required=False)
+    phone = serializers.CharField(max_length=20, required=False)
+    id_type = serializers.ChoiceField(choices=["Aadhaar", "PAN", "Passport", "DrivingLicense"], required=False)
+    id_number = serializers.CharField(max_length=50, required=False)
+    address = serializers.CharField(required=False)
     extra_bed = serializers.BooleanField(default=False)
     special_requests = serializers.CharField(required=False, allow_blank=True, default="")
     guest_count = serializers.IntegerField(min_value=1, default=1)
     promo_code = serializers.CharField(required=False, allow_blank=True, default="")
+    status = serializers.ChoiceField(choices=Booking.Status.choices, required=False, default=Booking.Status.PENDING)
 
     def validate(self, data):
         import datetime
         import re
         from rooms.models import Room
         from promos.models import PromoCode
+        from guests.models import Guest
         from guests.utils import validate_aadhaar
         from django.core.exceptions import ValidationError as DjangoValidationError
 
-        # ID Validation Logic
-        id_type = data.get("id_type")
-        id_number = data.get("id_number", "").strip().upper()
-        data["id_number"] = id_number # Normalize to uppercase
-        
-        if id_type == "Aadhaar":
-            if not validate_aadhaar(id_number):
-                raise serializers.ValidationError({"id_number": "Invalid Aadhaar number. Please check the digits."})
-        elif id_type == "PAN":
-            if not re.fullmatch(r"^[A-Z]{5}[0-9]{4}[A-Z]{1}$", id_number):
-                raise serializers.ValidationError({"id_number": "PAN must be in format ABCDE1234F."})
-        elif id_type == "Passport":
-            if not re.fullmatch(r"^[A-Z][1-9]\d{6}$", id_number):
-                raise serializers.ValidationError({"id_number": "Passport must be 1 letter followed by 7 digits."})
-        elif id_type == "DrivingLicense":
-            if not re.fullmatch(r"^[A-Z]{2}[0-9A-Z]{13}$", id_number):
-                raise serializers.ValidationError({"id_number": "Driving License must be 15 characters total."})
+        guest_id = data.get("guest_id")
+        if not guest_id:
+            # Required fields for new guest
+            required_fields = ["full_name", "email", "phone", "id_type", "id_number", "address"]
+            errors = {}
+            for field in required_fields:
+                if not data.get(field):
+                    errors[field] = "This field is required for new guests."
+            if errors:
+                raise serializers.ValidationError(errors)
 
-        # Phone validation
-        phone = data.get("phone")
-        if not re.fullmatch(r"^\+\d{1,3}\d{10}$", phone):
-            raise serializers.ValidationError({"phone": "Phone must include country code followed by 10 digits (e.g., +919876543210)."})
+            # ID Validation Logic (only for new guest)
+            id_type = data.get("id_type")
+            id_number = data.get("id_number", "").strip().upper()
+            # Remove spaces/hyphens for storage consistency
+            id_number = id_number.replace(" ", "").replace("-", "")
+            data["id_number"] = id_number
+            
+            if id_type == "Aadhaar":
+                if not validate_aadhaar(id_number):
+                    # For testing purposes, if you know the number is 12 digits but checksum is failing
+                    raise serializers.ValidationError({"id_number": "Aadhaar Verhoeff check failed. Please use a valid UIDAI number (e.g. 5486 8452 0315)."})
+            elif id_type == "PAN":
+                if not re.fullmatch(r"^[A-Z]{5}[0-9]{4}[A-Z]$", id_number):
+                    raise serializers.ValidationError({"id_number": "PAN must be in format ABCDE1234F."})
+            elif id_type == "Passport":
+                if not re.fullmatch(r"^[A-Z][1-9]\d{6}$", id_number):
+                    # Relaxing slightly to any digit after letter for non-Indian or variant passports
+                    if not re.fullmatch(r"^[A-Z]\d{7,8}$", id_number):
+                        raise serializers.ValidationError({"id_number": "Passport typically starts with a letter followed by 7-8 digits."})
+            elif id_type == "DrivingLicense":
+                # DL sizes vary by state (10-15 chars). Standardizing on common patterns.
+                if len(id_number) < 10 or len(id_number) > 16:
+                    raise serializers.ValidationError({"id_number": "Driving License should be 10-16 characters."})
+
+            # Phone validation
+            phone = data.get("phone")
+            if phone:
+                # Remove spaces/dashes before regex check
+                phone = phone.replace(" ", "").replace("-", "")
+                if not re.fullmatch(r"^\+\d{10,15}$", phone):
+                    raise serializers.ValidationError({"phone": "Phone must include '+' and country code followed by 10+ digits."})
+                data["phone"] = phone
+        else:
+            try:
+                data["_guest"] = Guest.objects.get(pk=guest_id)
+            except Guest.DoesNotExist:
+                raise serializers.ValidationError({"guest_id": "Guest not found."})
 
         try:
             room = Room.objects.get(pk=data["room_id"], status="Available")
@@ -73,7 +102,7 @@ class BookingCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"guest_count": f"Room capacity is {room.capacity} guests."}
             )
-        if Booking.has_conflict(room.id, check_in, check_out):
+        if Booking.has_conflict(room.pk, check_in, check_out):
             raise serializers.ValidationError(
                 "This room is already booked for the selected dates."
             )
@@ -97,18 +126,20 @@ class BookingCreateSerializer(serializers.Serializer):
 
         room = validated_data["_room"]
         promo = validated_data["_promo"]
+        guest = validated_data.get("_guest")
 
-        guest, _ = Guest.objects.get_or_create(
-            email=validated_data["email"],
-            defaults={
-                "full_name": validated_data["full_name"],
-                "phone": validated_data["phone"],
-                "id_type": validated_data["id_type"],
-                "id_number": validated_data["id_number"],
-                "address": validated_data["address"],
-                "extra_bed": validated_data["extra_bed"],
-            },
-        )
+        if not guest:
+            guest, _ = Guest.objects.get_or_create(
+                email=validated_data["email"],
+                defaults={
+                    "full_name": validated_data["full_name"],
+                    "phone": validated_data["phone"],
+                    "id_type": validated_data["id_type"],
+                    "id_number": validated_data["id_number"],
+                    "address": validated_data["address"],
+                    "extra_bed": validated_data["extra_bed"],
+                },
+            )
 
         pricing = Booking.calculate_price(
             room, 
@@ -131,7 +162,7 @@ class BookingCreateSerializer(serializers.Serializer):
             total_amount=pricing["total_amount"],
             promo_code=promo,
             special_requests=validated_data.get("special_requests", ""),
-            status=Booking.Status.PENDING,
+            status=validated_data.get("status", Booking.Status.PENDING),
             extra_bed=validated_data["extra_bed"],
         )
 
@@ -155,6 +186,7 @@ class BookingListSerializer(serializers.ModelSerializer):
             "id", "reference", "room_number", "room_type",
             "guest_name", "guest_email", "check_in", "check_out",
             "nights", "total_amount", "status", "created_at",
+            "payment_id",
         ]
 
 
@@ -192,8 +224,8 @@ class BookingStatusUpdateSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=Booking.Status.choices)
 
     def validate_status(self, value):
-        current = self.instance.status if self.instance else None
-        allowed = self.VALID_TRANSITIONS.get(current, [])
+        current = self.instance.status if self.instance else ""
+        allowed = self.VALID_TRANSITIONS.get(str(current), [])
         if value not in allowed:
             raise serializers.ValidationError(
                 f"Cannot transition from '{current}' to '{value}'. Allowed: {allowed}"

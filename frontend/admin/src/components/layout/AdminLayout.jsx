@@ -10,8 +10,14 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-screen bg-slate-50/50">
-      <Sidebar />
-      <div className="flex-1 lg:pl-[280px] flex flex-col min-h-screen">
+      <div className="hidden lg:block">
+        <Sidebar />
+      </div>
+      {/* Mobile Sidebar (optional, for now just show sidebar if needed or adjust padding) */}
+      <div className="lg:hidden">
+         <Sidebar />
+      </div>
+      <div className="flex-1 pl-[280px] flex flex-col min-h-screen">
         <TopBar />
         <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full">
           <Outlet />

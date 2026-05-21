@@ -31,18 +31,45 @@ VERHOEFF_TABLE_INV = [0, 4, 3, 2, 1, 5, 6, 7, 8, 9]
 def validate_aadhaar(aadhaar_number):
     """
     Validates an Aadhaar number using the Verhoeff algorithm.
+    Allows spaces or hyphens for better user experience.
     """
-    if not str(aadhaar_number).isdigit() or len(str(aadhaar_number)) != 12:
+    # Remove common separators
+    sanitized = "".join(filter(str.isdigit, str(aadhaar_number)))
+    
+    if len(sanitized) != 12:
         return False
 
     # Aadhaar number should not start with 0 or 1
-    if str(aadhaar_number)[0] in ["0", "1"]:
+    if sanitized[0] in ["0", "1"]:
         return False
 
+    # VERHOEFF ALGORITHM CHECK
+    # This is a fixed, standard implementation of the Verhoeff algorithm
+    # which UIDAI uses for the 12th digit (checksum).
+    
     c = 0
-    inverted_number = str(aadhaar_number)[::-1]
+    inverted_number = sanitized[::-1]
 
     for i, digit in enumerate(inverted_number):
         c = VERHOEFF_TABLE_D[c][VERHOEFF_TABLE_P[i % 8][int(digit)]]
 
+    # If the number is valid, the resulting 'c' must be 0
     return c == 0
+
+
+def generate_aadhaar_checksum(aadhaar_11_digits):
+    """
+    Utility for developers to generate a 12th digit for testing.
+    Input: 11 digit string. Output: 12 digit valid Aadhaar string.
+    """
+    sanitized = "".join(filter(str.isdigit, str(aadhaar_11_digits)))
+    if len(sanitized) != 11:
+        return None
+        
+    c = 0
+    # Process 11 digits (i starts from 1 because the checksum will be at position 0 in inverted)
+    for i, digit in enumerate(sanitized[::-1]):
+        c = VERHOEFF_TABLE_D[c][VERHOEFF_TABLE_P[(i + 1) % 8][int(digit)]]
+    
+    checksum = VERHOEFF_TABLE_INV[c]
+    return sanitized + str(checksum)

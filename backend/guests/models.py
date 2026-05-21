@@ -7,22 +7,21 @@ import re
 
 def validate_id_number(obj):
     id_type = obj.id_type
-    id_number = obj.id_number.strip().upper() if obj.id_number else ""
+    id_number = str(obj.id_number).strip().upper() if obj.id_number else ""
+    id_number = id_number.replace(" ", "").replace("-", "")
     
     if id_type == "Aadhaar":
         if not validate_aadhaar(id_number):
-            raise ValidationError({"id_number": "Invalid Aadhaar number. Please check the digits and try again."})
+            raise ValidationError({"id_number": "Aadhaar Verhoeff check failed. Please use a valid UIDAI number (e.g. 5486 8452 0315)."})
     elif id_type == "PAN":
-        if not re.fullmatch(r"^[A-Z]{5}[0-9]{4}[A-Z]{1}$", id_number):
+        if not re.fullmatch(r"^[A-Z]{5}[0-9]{4}[A-Z]$", id_number):
             raise ValidationError({"id_number": "PAN must be in format ABCDE1234F."})
     elif id_type == "Passport":
-        # Standard Indian Passport: 1 uppercase letter, followed by 7 digits (no 0 after letter)
-        if not re.fullmatch(r"^[A-Z][1-9]\d{6}$", id_number):
-            raise ValidationError({"id_number": "Passport must be 1 letter followed by 7 digits (e.g., Z1234567)."})
+        if not re.fullmatch(r"^[A-Z]\d{7,8}$", id_number):
+            raise ValidationError({"id_number": "Passport typically starts with a letter followed by 7-8 digits."})
     elif id_type == "DrivingLicense":
-        # Simplified DL format: 15 chars total, starts with 2 letters (state code)
-        if not re.fullmatch(r"^[A-Z]{2}[0-9A-Z]{13}$", id_number):
-            raise ValidationError({"id_number": "Driving License must be 15 characters (e.g., TN0120100001234)."})
+        if len(id_number) < 10 or len(id_number) > 16:
+            raise ValidationError({"id_number": "Driving License should be 10-16 characters."})
 
     # Ensure the cleaned uppercase ID is saved
     obj.id_number = id_number

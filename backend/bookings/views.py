@@ -128,7 +128,10 @@ class BookingViewSet(viewsets.ModelViewSet):
             from rooms.models import Room
 
             hotel = HotelSettings.objects.first()
-            hotel_name = hotel.hotel_name if hotel else "RBMS EXECUTIVE HOTEL"
+            hotel_name = hotel.hotel_name if hotel else "Sri ASK Residency"
+            hotel_address = hotel.hotel_address if (hotel and hotel.hotel_address) else "1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402"
+            hotel_phone = hotel.hotel_phone if (hotel and hotel.hotel_phone) else "+91 9444551122"
+            hotel_email = hotel.hotel_email if (hotel and hotel.hotel_email) else "sriaskresidency@gmail.com"
             
             # Fetch full room object for physical address if available
             room_obj = None
@@ -142,10 +145,10 @@ class BookingViewSet(viewsets.ModelViewSet):
             context = {
                 'invoice': invoice,
                 'hotel_name': hotel_name,
-                'hotel_address': "Tech Park, Phase II, Bangalore, India", # Default if no specific settings
-                'hotel_contact': "+91 98765 43210 | reservation@rbms.com",
-                'check_in_time': hotel.check_in_time if hotel else "14:00",
-                'check_out_time': hotel.check_out_time if hotel else "11:00",
+                'hotel_address': hotel_address,
+                'hotel_contact': f"{hotel_phone} | {hotel_email}",
+                'check_in_time': hotel.check_in_time if hotel else "12:00 PM",
+                'check_out_time': hotel.check_out_time if hotel else "11:00 AM",
                 'room': room_obj,
                 'is_formal': True
             }

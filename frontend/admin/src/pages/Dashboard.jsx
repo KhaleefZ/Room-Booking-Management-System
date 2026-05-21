@@ -59,8 +59,8 @@ export default function Dashboard() {
   const stats = [
     { label: "Gross Revenue", value: "₹" + Number(rev?.total_revenue || 0).toLocaleString(), icon: <TrendingUp className="text-emerald-500" />, sub: "Cycle to date", trend: "+12.5%", color: "emerald" },
     { label: "Inventory Load", value: (occ?.overall_occupancy_percent || 0) + "%", icon: <DoorOpen className="text-indigo-500" />, sub: (rev?.inventory?.occupied || 0) + " Units Active", trend: "Stable", color: "indigo" },
-    { label: "Check-ins Today", value: rev?.total_bookings || 0, icon: <Calendar className="text-orange-500" />, sub: "Scheduled events", trend: "High", color: "orange" },
-    { label: "Guest Velocity", value: "32", icon: <Users className="text-blue-500" />, sub: "Active residents", trend: "+4%", color: "blue" },
+    { label: "Check-ins Today", value: rev?.today_bookings_count || 0, icon: <Calendar className="text-orange-500" />, sub: "Scheduled events", trend: "High", color: "orange" },
+    { label: "Guest Velocity", value: rev?.inventory?.occupied || 0, icon: <Users className="text-blue-500" />, sub: "Active residents", trend: "+4%", color: "blue" },
   ];
 
   const today = new Date();
@@ -240,8 +240,13 @@ export default function Dashboard() {
                       </td>
                       <td className="px-8 py-5 text-right">
                         <div className="flex flex-col items-end">
-                           <span className="font-black text-slate-900 text-xs">₹{Number(booking.total_price || 0).toLocaleString()}</span>
-                           <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest mt-0.5">Verified</span>
+                           <span className="font-black text-slate-900 text-xs">₹{Number(booking.total_amount || 0).toLocaleString()}</span>
+                           <span className={"text-[8px] font-bold uppercase tracking-widest mt-0.5 " + (
+                             booking.status === 'Cancelled' ? 'text-red-400' :
+                             booking.payment_id ? 'text-emerald-500' : 'text-orange-400'
+                           )}>
+                             {booking.status === 'Cancelled' ? 'Voided' : booking.payment_id ? 'Verified' : 'Unpaid'}
+                           </span>
                         </div>
                       </td>
                     </tr>

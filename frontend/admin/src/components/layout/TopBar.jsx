@@ -8,6 +8,7 @@ const TITLES = {
   "/guests": "Guests",
   "/promos": "Promo Codes",
   "/reports": "Reports",
+  "/contacts": "Inquiries",
   "/settings": "Settings",
 };
 

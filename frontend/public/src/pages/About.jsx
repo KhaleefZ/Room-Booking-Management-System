@@ -13,7 +13,7 @@ export default function About() {
           <div>
             <h2 className="font-serif text-3xl font-bold text-gray-900 mb-4">Our Story</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Founded with a passion for exceptional hospitality, HotelRBMS has been welcoming
+              Founded with a passion for exceptional hospitality, Sri ASK Residency has been welcoming
               guests from around the world. We believe every stay should be a memory worth keeping.
             </p>
             <p className="text-gray-600 leading-relaxed">

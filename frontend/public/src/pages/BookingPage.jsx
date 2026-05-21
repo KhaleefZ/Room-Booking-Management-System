@@ -157,7 +157,7 @@ export default function BookingPage() {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
-        name: "HotelRBMS",
+        name: "Sri ASK Residency",
         description: `Booking ${order.booking_reference}`,
         order_id: order.order_id,
         prefill: {

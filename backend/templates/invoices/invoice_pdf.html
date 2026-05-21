@@ -162,7 +162,7 @@
                     <td class="hotel-info">
                         <div class="hotel-name">{{ hotel_name }}</div>
                         <div class="hotel-sub">{{ hotel_address }}</div>
-                        <div class="hotel-sub">Contact: {{ hotel_contact }}</div>
+                        <div class="hotel-sub">Contact: {{ hotel_contact }} | Email: {{ hotel_email }}</div>
                     </td>
                     <td class="invoice-label-cell">
                         <div class="invoice-label">INVOICE</div>
@@ -248,7 +248,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            {{ hotel_name }} | Executive Systems | Managed via RBMS Platform
+            {{ hotel_name }} | {{ hotel_address }}
         </div>
     </div>
 </body>

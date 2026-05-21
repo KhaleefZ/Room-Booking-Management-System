@@ -1,18 +1,30 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { sendContactMessage } from "../api/contacts";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
       toast.error("Please fill in all required fields.");
       return;
     }
-    setSubmitted(true);
-    toast.success("Message sent! We'll get back to you soon.");
+
+    setLoading(true);
+    try {
+      await sendContactMessage(form);
+      setSubmitted(true);
+      toast.success("Message sent! We'll get back to you soon.");
+    } catch (error) {
+      console.error("Contact error:", error);
+      toast.error("Failed to send message. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,10 +44,10 @@ export default function Contact() {
             <div>
               <h2 className="font-serif text-2xl font-bold text-gray-900 mb-6">Get In Touch</h2>
               {[
-                { icon: "📍", label: "Address", value: "123 Hotel Street, Coimbatore, Tamil Nadu" },
-                { icon: "📞", label: "Phone", value: "+91 98765 43210" },
-                { icon: "✉️", label: "Email", value: "info@hotelrbms.com" },
-                { icon: "🕐", label: "Check-in / Check-out", value: "2:00 PM / 11:00 AM" },
+                { icon: "📍", label: "Address", value: "1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402" },
+                { icon: "📞", label: "Phone", value: "+91 9444551122" },
+                { icon: "✉️", label: "Email", value: "sriaskresidency@gmail.com" },
+                { icon: "🕐", label: "Check-in / Check-out", value: "12:00 PM / 12:00 PM" },
               ].map((item) => (
                 <div key={item.label} className="flex gap-4 items-start mb-5">
                   <span className="text-2xl">{item.icon}</span>
@@ -47,12 +59,17 @@ export default function Contact() {
               ))}
             </div>
 
-            {/* Map placeholder */}
-            <div className="bg-gray-200 rounded-2xl h-48 flex items-center justify-center text-gray-400">
-              <div className="text-center">
-                <div className="text-4xl mb-2">🗺️</div>
-                <p className="text-sm">Map embed goes here</p>
-              </div>
+            {/* Map */}
+            <div className="bg-gray-200 rounded-2xl h-64 overflow-hidden">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.480004550731!2d77.1211966!3d11.024828!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba855ea2251d43d%3A0x66dae26f4706f305!2sSri%20ASK%20Residency!5e0!3m2!1sen!2sin!4v1716284803923!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
           </div>
 
@@ -118,8 +135,12 @@ export default function Contact() {
                     placeholder="How can we help you?"
                   />
                 </div>
-                <button type="submit" className="btn-primary w-full">
-                  Send Message
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className={`btn-primary w-full ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                >
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
               </form>
             )}

@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="font-serif text-white text-xl font-bold mb-3">HotelRBMS</h3>
+            <h3 className="font-serif text-white text-xl font-bold mb-3">Sri ASK Residency</h3>
             <p className="text-sm leading-relaxed">
               Experience comfort and luxury in the heart of the city.
               Your perfect stay awaits.
@@ -27,20 +27,25 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <a href="/manage" className="hover:text-white transition-colors">
+                  Staff Login
+                </a>
+              </li>
             </ul>
           </div>
           <div>
             <h4 className="text-white font-semibold mb-3">Contact</h4>
             <ul className="space-y-2 text-sm">
-              <li>📍 123 Hotel Street, Coimbatore</li>
-              <li>📞 +91 98765 43210</li>
-              <li>✉️ info@hotelrbms.com</li>
-              <li>🕐 Check-in: 2:00 PM | Check-out: 11:00 AM</li>
+              <li>📍 1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402</li>
+              <li>📞 +91 9444551122</li>
+              <li>✉️ sriaskresidency@gmail.com </li>
+              <li>🕐 Check-in: 12:00 PM | Check-out: 12:00 PM</li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-6 text-center text-xs">
-          © {new Date().getFullYear()} HotelRBMS. Built by HaizoTech.
+          © {new Date().getFullYear()} Sri ASK Residency. Built by HaizoTech.
         </div>
       </div>
     </footer>

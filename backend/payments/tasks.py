@@ -82,7 +82,7 @@ def _render_html_template(template_content: str, context: dict) -> str:
         <div class="email-container">
             <div class="header">
                 <div class="logo">R</div>
-                <div class="title">RBMS Executive Intelligence</div>
+                <div class="title">Sri ASK Residency Enterprise Intelligence</div>
             </div>
             <div class="card">
                 <div class="content">
@@ -90,7 +90,7 @@ def _render_html_template(template_content: str, context: dict) -> str:
                 </div>
             </div>
             <div class="footer">
-                Operated by HaizoTech RBMS — Automated Log System
+                Operated by Sri ASK Residency — Automated Log System
             </div>
         </div>
     </body>
@@ -106,7 +106,7 @@ def send_booking_confirmation(booking_id: int):
     try:
         booking = Booking.objects.select_related("room", "guest").get(pk=booking_id)
         hotel_settings = HotelSettings.get_settings()
-        hotel_name = hotel_settings.hotel_name if hotel_settings else "RBMS"
+        hotel_name = hotel_settings.hotel_name if hotel_settings else "Sri ASK Residency"
 
         context = {
             "guest_name": booking.guest.full_name,
@@ -175,7 +175,7 @@ def send_booking_confirmation(booking_id: int):
         </div>
 
         <div style="text-align: center; color: #94a3b8; font-size: 12px; line-height: 1.6;">
-            <p>Thank you for choosing RBMS Executive Services. This is a system-generated secure transmission.</p>
+            <p>Thank you for choosing Sri ASK Residency. This is a system-generated secure transmission.</p>
         </div>
         """
 
@@ -254,7 +254,7 @@ def send_checkout_invoice(invoice_id: int):
                 <span style="color: #475569; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">Final Statement</span>
             </div>
             <h1 style="color: #0f172a; margin: 0; font-size: 28px; font-weight: 900; tracking: tight;">Thank you!</h1>
-            <p style="color: #64748b; margin-top: 8px; font-size: 15px;">It was a pleasure having you at {hotel_settings.hotel_name if hotel_settings else "RBMS"}.</p>
+            <p style="color: #64748b; margin-top: 8px; font-size: 15px;">It was a pleasure having you at {hotel_settings.hotel_name if hotel_settings else "Sri ASK Residency"}.</p>
         </div>
 
         <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 25px;">
@@ -307,7 +307,7 @@ def send_checkout_invoice(invoice_id: int):
 
         # SEND TO GUEST
         msg_guest = EmailMultiAlternatives(
-            subject=f"FINAL INVOICE: {invoice.invoice_number} — RBMS Executive",
+            subject=f"FINAL INVOICE: {invoice.invoice_number} — Sri ASK Residency",
             body=text_body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[invoice.guest_email],
