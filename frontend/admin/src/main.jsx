@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter basename="/manage">
+    <BrowserRouter basename="/">
       <QueryClientProvider client={queryClient}>
         <App />
         <Toaster position="top-right" toastOptions={{ duration: 4000 }} />

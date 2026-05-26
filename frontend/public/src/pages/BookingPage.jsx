@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -8,6 +8,7 @@ import PriceBreakdown from "../components/ui/PriceBreakdown";
 import { createBooking, createPaymentOrder, verifyPayment } from "../api/bookings";
 import { checkIdExists } from "../api/guests";
 import { validatePromo } from "../api/promos";
+import { getHotelSettings } from "../api/settings";
 import { validateAadhaar, validatePAN, validatePassport } from "../utils/validators";
 
 const ID_TYPES = ["Aadhaar", "PAN", "Passport", "DrivingLicense"];
@@ -29,6 +30,13 @@ export default function BookingPage() {
   const store = useBookingStore();
   const [promoInput, setPromoInput] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
+  const [taxRate, setTaxRate] = useState(18);
+
+  useEffect(() => {
+    getHotelSettings().then((s) => {
+      if (s?.tax_rate) setTaxRate(Number(s.tax_rate));
+    }).catch(() => {});
+  }, []);
 
   // Redirect if no room selected
   if (!store.roomData) {
@@ -403,6 +411,7 @@ export default function BookingPage() {
                 nights={nights}
                 promoResult={promoResult}
                 extraBed={guestDetails.extra_bed}
+                taxRate={taxRate}
               />
 
               <div className="flex gap-3 pt-2">

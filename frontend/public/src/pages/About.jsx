@@ -24,9 +24,9 @@ export default function About() {
           <div className="bg-brand-50 rounded-2xl p-8 text-center">
             <div className="grid grid-cols-2 gap-6">
               {[
-                { value: "10+", label: "Years of Service" },
-                { value: "50+", label: "Rooms" },
-                { value: "10K+", label: "Happy Guests" },
+                { value: "1+", label: "Years of Service" },
+                { value: "8", label: "Rooms" },
+                { value: "1000+", label: "Happy Guests" },
                 { value: "4.9★", label: "Average Rating" },
               ].map((s) => (
                 <div key={s.label}>
