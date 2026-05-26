@@ -46,7 +46,7 @@ export default function BookingForm() {
 
   const { data: roomsData } = useQuery({
     queryKey: ["rooms-available"],
-    queryFn: () => getRooms({ status: "Available" }),
+    queryFn: () => getRooms({}),
   });
 
   const { data: guestsData } = useQuery({
@@ -244,7 +244,7 @@ export default function BookingForm() {
                 className="input-field w-full h-11"
                 required
               >
-                <option value="">-- Available Rooms --</option>
+                <option value="">-- All Rooms --</option>
                 {rooms.map(r => (
                   <option key={r.id} value={r.id}>Room {r.room_number} - ₹{r.base_price}/night</option>
                 ))}

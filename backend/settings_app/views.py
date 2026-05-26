@@ -30,3 +30,11 @@ class HotelSettingsView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class PublicHotelSettingsView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        settings = HotelSettings.get_settings()
+        return Response(HotelSettingsSerializer(settings).data)

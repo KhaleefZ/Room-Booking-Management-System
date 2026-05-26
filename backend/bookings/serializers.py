@@ -86,9 +86,12 @@ class BookingCreateSerializer(serializers.Serializer):
                 raise serializers.ValidationError({"guest_id": "Guest not found."})
 
         try:
-            room = Room.objects.get(pk=data["room_id"], status="Available")
+            room = Room.objects.get(pk=data["room_id"])
         except Room.DoesNotExist:
             raise serializers.ValidationError({"room_id": "Room not found or unavailable."})
+
+        if room.status in ["Maintenance", "Blocked"]:
+            raise serializers.ValidationError({"room_id": f"Room is currently {room.status} and cannot be booked."})
 
         check_in = data["check_in"]
         check_out = data["check_out"]
