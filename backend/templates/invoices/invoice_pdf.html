@@ -227,7 +227,7 @@
                     <td class="total-value">{{ invoice.base_amount }}</td>
                 </tr>
                 <tr>
-                    <td class="total-label">GST (18%)</td>
+                    <td class="total-label">GST ({{ tax_rate|floatformat:0 }}%)</td>
                     <td class="total-value">{{ invoice.tax_amount }}</td>
                 </tr>
                 <tr class="grand-total-row">

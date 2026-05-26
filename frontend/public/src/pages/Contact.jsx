@@ -1,8 +1,22 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { sendContactMessage } from "../api/contacts";
+import { getPublicSettings } from "../api/settings";
 
 export default function Contact() {
+  const { data: settings } = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: getPublicSettings,
+  });
+
+  const contactItems = [
+    { icon: "📍", label: "Address", value: settings?.hotel_address || "1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402" },
+    { icon: "📞", label: "Phone", value: settings?.hotel_phone || "+91 9444551122" },
+    { icon: "✉️", label: "Email", value: settings?.hotel_email || "sriaskresidency@gmail.com" },
+    { icon: "🕐", label: "Check-in / Check-out", value: `${settings?.check_in_time?.slice(0, 5) || "12:00"} / ${settings?.check_out_time?.slice(0, 5) || "12:00"}` },
+  ];
+
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,12 +57,7 @@ export default function Contact() {
           <div className="space-y-6">
             <div>
               <h2 className="font-serif text-2xl font-bold text-gray-900 mb-6">Get In Touch</h2>
-              {[
-                { icon: "📍", label: "Address", value: "1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402" },
-                { icon: "📞", label: "Phone", value: "+91 9444551122" },
-                { icon: "✉️", label: "Email", value: "sriaskresidency@gmail.com" },
-                { icon: "🕐", label: "Check-in / Check-out", value: "12:00 PM / 12:00 PM" },
-              ].map((item) => (
+              {contactItems.map((item) => (
                 <div key={item.label} className="flex gap-4 items-start mb-5">
                   <span className="text-2xl">{item.icon}</span>
                   <div>

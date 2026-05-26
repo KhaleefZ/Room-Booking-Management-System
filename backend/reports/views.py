@@ -140,6 +140,8 @@ class ExportCSVView(APIView):
 
     def get(self, request):
         from_date, to_date = _parse_date_params(request)
+        from settings_app.models import HotelSettings
+        h_settings = HotelSettings.get_settings()
 
         bookings = (
             Booking.objects.filter(check_in__gte=from_date, check_in__lte=to_date)
@@ -156,7 +158,7 @@ class ExportCSVView(APIView):
             "TRANSACTION REF", "GUEST NAME", "ID TYPE", "ID NUMBER", 
             "ROOM", "ROOM TYPE", "CHECK-IN", "CHECK-OUT", "NIGHTS",
             "BASE REVENUE", "DISCOUNT APPLIED", "TAXABLE AMOUNT", 
-            "GST (18%)", "TOTAL SETTLEMENT", "STATUS", "PAYMENT REF"
+            f"GST ({h_settings.tax_rate:.0f}%)", "TOTAL SETTLEMENT", "STATUS", "PAYMENT REF"
         ])
 
         for b in bookings:

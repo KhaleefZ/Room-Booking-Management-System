@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getPublicSettings } from "../../api/settings";
 import navLogo from "../../assets/Nav Logo.png";
 
 export default function Navbar() {
+  const { data: settings } = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: getPublicSettings,
+  });
+
+  const hotelName = settings?.hotel_name || "Sri ASK Residency";
   const [open, setOpen] = useState(false);
 
   const links = [
@@ -19,7 +27,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={navLogo} alt="Sri ASK Residency" className="h-12 w-auto" />
+            <img src={navLogo} alt={hotelName} className="h-12 w-auto" />
           </Link>
 
           {/* Desktop links */}
