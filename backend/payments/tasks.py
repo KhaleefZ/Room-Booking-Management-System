@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 def _render_html_template(template_content: str, context: dict) -> str:
     """Renders the user-provided template with context and wraps it in a modern HTML layout."""
+    from settings_app.models import HotelSettings
+    hotel = HotelSettings.get_settings()
     
     # Process placeholders
     processed_content = template_content
@@ -81,8 +83,8 @@ def _render_html_template(template_content: str, context: dict) -> str:
     <body>
         <div class="email-container">
             <div class="header">
-                <div class="logo">R</div>
-                <div class="title">Sri ASK Residency Enterprise Intelligence</div>
+                <div class="logo">{hotel.hotel_name[0] if hotel.hotel_name else 'H'}</div>
+                <div class="title">{hotel.hotel_name} Global Operations</div>
             </div>
             <div class="card">
                 <div class="content">
@@ -90,7 +92,7 @@ def _render_html_template(template_content: str, context: dict) -> str:
                 </div>
             </div>
             <div class="footer">
-                Operated by Sri ASK Residency — Automated Log System
+                Operated by {hotel.hotel_name} — Automated Log System
             </div>
         </div>
     </body>
@@ -175,7 +177,7 @@ def send_booking_confirmation(booking_id: int):
         </div>
 
         <div style="text-align: center; color: #94a3b8; font-size: 12px; line-height: 1.6;">
-            <p>Thank you for choosing Sri ASK Residency. This is a system-generated secure transmission.</p>
+            <p>Thank you for choosing {hotel_name}. This is a system-generated secure transmission.</p>
         </div>
         """
 
@@ -185,7 +187,7 @@ def send_booking_confirmation(booking_id: int):
         msg = EmailMultiAlternatives(
             subject=f"RESERVATION CONFIRMED: Log {context['booking_reference']} — {hotel_name}",
             body=text_body,
-            from_email=settings.DEFAULT_FROM_EMAIL,
+            from_email=f"{hotel_name} <{settings.EMAIL_HOST_USER}>",
             to=[booking.guest.email],
         )
         msg.attach_alternative(html_body, "text/html")
@@ -307,9 +309,9 @@ def send_checkout_invoice(invoice_id: int):
 
         # SEND TO GUEST
         msg_guest = EmailMultiAlternatives(
-            subject=f"FINAL INVOICE: {invoice.invoice_number} — Sri ASK Residency",
+            subject=f"FINAL INVOICE: {invoice.invoice_number} — {hotel_settings.hotel_name}",
             body=text_body,
-            from_email=settings.DEFAULT_FROM_EMAIL,
+            from_email=f"{hotel_settings.hotel_name} <{settings.EMAIL_HOST_USER}>",
             to=[invoice.guest_email],
         )
         msg_guest.attach_alternative(html_body, "text/html")
@@ -321,7 +323,7 @@ def send_checkout_invoice(invoice_id: int):
         msg_admin = EmailMultiAlternatives(
             subject=f"ARCHIVE: Checkout {invoice.invoice_number} | {invoice.guest_name}",
             body=text_body,
-            from_email=settings.DEFAULT_FROM_EMAIL,
+            from_email=f"{hotel_settings.hotel_name} <{settings.EMAIL_HOST_USER}>",
             to=[hotel_settings.admin_email_address],
         )
         msg_admin.attach_alternative(html_body, "text/html")

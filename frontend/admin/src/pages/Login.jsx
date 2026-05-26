@@ -1,14 +1,23 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { login } from "../api/auth";
+import { getPublicSettings } from "../api/settings";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
 
 export default function Login() {
   const navigate = useNavigate();
   const { setTokens, setUser, isAuthenticated } = useAuthStore();
-  const [form, setForm] = useState({ username: "", password: "" });
+  const [form, setForm] = useState({ username: "" , password: "" });
   const [loading, setLoading] = useState(false);
+
+  const { data: settings } = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: getPublicSettings,
+  });
+
+  const hotelName = settings?.hotel_name || "Sri ASK Residency";
 
   if (isAuthenticated) {
     navigate("/");
@@ -37,9 +46,9 @@ export default function Login() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">S</span>
+            <span className="text-white font-bold text-2xl">{hotelName[0]}</span>
           </div>
-          <h1 className="text-white font-bold text-2xl">Sri ASK Residency</h1>
+          <h1 className="text-white font-bold text-2xl">{hotelName}</h1>
           <p className="text-gray-400 text-sm mt-1">Sign in to your dashboard</p>
         </div>
 
@@ -83,7 +92,7 @@ export default function Login() {
         </div>
 
         <p className="text-center text-gray-500 text-xs mt-6">
-          HaizoTech · Sri ASK Residency v1.0
+          HaizoTech · {hotelName} v1.0
         </p>
       </div>
     </div>

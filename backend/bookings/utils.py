@@ -16,6 +16,7 @@ def generate_invoice_pdf(invoice):
         'hotel_address': h_settings.hotel_address,
         'hotel_contact': h_settings.hotel_phone,
         'hotel_email': h_settings.hotel_email,
+        'tax_rate': h_settings.tax_rate,
         'check_in_time': h_settings.check_in_time.strftime("%I:%M %p"),
         'check_out_time': h_settings.check_out_time.strftime("%I:%M %p"),
         'logo_url': 'https://rbms-logo.png' 

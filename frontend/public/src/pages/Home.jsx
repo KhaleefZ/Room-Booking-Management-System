@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getRooms } from "../api/rooms";
+import { getPublicSettings } from "../api/settings";
 import RoomCard from "../components/ui/RoomCard";
 import Spinner from "../components/ui/Spinner";
 import logo from "../assets/logo.png";
@@ -11,7 +12,13 @@ export default function Home() {
     queryFn: () => getRooms({ status: "Available" }),
   });
 
+  const { data: settings } = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: getPublicSettings,
+  });
+
   const rooms = data?.results?.slice(0, 3) || [];
+  const hotelName = settings?.hotel_name || "Sri ASK Residency";
 
   return (
     <div className="bg-[#fcfaf6]">
@@ -24,7 +31,7 @@ export default function Home() {
             <div className="flex items-center justify-center order-1 w-full h-full">
               <img
                 src={logo}
-                alt="Sri ASK Residency Logo"
+                alt={`${hotelName} Logo`}
                 className="w-full h-auto max-w-full lg:scale-110 drop-shadow-[0_20px_60px_rgba(45,33,31,0.25)] transition-transform duration-700 hover:scale-[1.12]"
               />
             </div>
@@ -32,7 +39,7 @@ export default function Home() {
             {/* Right Section: Content */}
             <div className="space-y-8 lg:pl-4 order-2 text-center lg:text-left">
               <div className="inline-flex items-center gap-3 rounded-full border border-[#d8c6b2] bg-white/80 px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.35em] text-[#9a6c2f] shadow-sm backdrop-blur-sm">
-                Sri ASK Residency
+                {hotelName}
                 <span className="h-1.5 w-1.5 rounded-full bg-[#c97a1a] animate-pulse" />
                 Stay simple
               </div>

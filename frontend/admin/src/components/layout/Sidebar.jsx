@@ -1,5 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import useAuthStore from "../../store/authStore";
+import { getPublicSettings } from "../../api/settings";
 import toast from "react-hot-toast";
 import { 
   LayoutDashboard, 
@@ -28,6 +30,13 @@ export default function Sidebar() {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
 
+  const { data: settings } = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: getPublicSettings,
+  });
+
+  const hotelName = settings?.hotel_name || "Sri ASK Residency";
+
   const handleLogout = () => {
     logout();
     toast.success("Terminal Session Ended");
@@ -42,11 +51,11 @@ export default function Sidebar() {
           <div className="relative">
             <div className="absolute inset-0 bg-brand-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="w-12 h-12 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/20 relative z-10 border border-white/10">
-              <span className="text-white font-black text-xl italic tracking-tighter">S</span>
+              <span className="text-white font-black text-xl italic tracking-tighter">{hotelName[0]}</span>
             </div>
           </div>
           <div>
-            <p className="text-white font-black text-sm tracking-[0.2em] uppercase leading-none mb-1">Sri ASK Residency</p>
+            <p className="text-white font-black text-sm tracking-[0.2em] uppercase leading-none mb-1">{hotelName}</p>
             <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Enterprise Intelligence</p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import useBookingStore from "../store/bookingStore";
 import BookingSteps from "../components/ui/BookingSteps";
@@ -8,6 +8,7 @@ import PriceBreakdown from "../components/ui/PriceBreakdown";
 import { createBooking, createPaymentOrder, verifyPayment } from "../api/bookings";
 import { checkIdExists } from "../api/guests";
 import { validatePromo } from "../api/promos";
+import { getPublicSettings } from "../api/settings";
 import { validateAadhaar, validatePAN, validatePassport } from "../utils/validators";
 
 const ID_TYPES = ["Aadhaar", "PAN", "Passport", "DrivingLicense"];
@@ -29,6 +30,11 @@ export default function BookingPage() {
   const store = useBookingStore();
   const [promoInput, setPromoInput] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
+
+  const { data: settings } = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: getPublicSettings,
+  });
 
   // Redirect if no room selected
   if (!store.roomData) {
@@ -157,7 +163,7 @@ export default function BookingPage() {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
-        name: "Sri ASK Residency",
+        name: settings?.hotel_name || "Sri ASK Residency",
         description: `Booking ${order.booking_reference}`,
         order_id: order.order_id,
         prefill: {
@@ -403,6 +409,7 @@ export default function BookingPage() {
                 nights={nights}
                 promoResult={promoResult}
                 extraBed={guestDetails.extra_bed}
+                taxRate={settings?.tax_rate || 18}
               />
 
               <div className="flex gap-3 pt-2">

@@ -12,3 +12,13 @@ class HotelSettingsSerializer(serializers.ModelSerializer):
             "guest_email_template", "admin_email_template",
             "admin_email_address",
         ]
+
+
+class PublicHotelSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HotelSettings
+        fields = [
+            "hotel_name", "hotel_address", "hotel_phone", "hotel_email",
+            "check_in_time", "check_out_time",
+            "tax_rate", "cancellation_policy",
+        ]

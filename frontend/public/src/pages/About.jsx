@@ -1,4 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
+import { getPublicSettings } from "../api/settings";
+
 export default function About() {
+  const { data: settings } = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: getPublicSettings,
+  });
+
+  const hotelName = settings?.hotel_name || "Sri ASK Residency";
+
   return (
     <div className="min-h-screen bg-white">
       <div className="bg-gray-900 text-white py-20">
@@ -13,7 +23,7 @@ export default function About() {
           <div>
             <h2 className="font-serif text-3xl font-bold text-gray-900 mb-4">Our Story</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Founded with a passion for exceptional hospitality, Sri ASK Residency has been welcoming
+              Founded with a passion for exceptional hospitality, {hotelName} has been welcoming
               guests from around the world. We believe every stay should be a memory worth keeping.
             </p>
             <p className="text-gray-600 leading-relaxed">

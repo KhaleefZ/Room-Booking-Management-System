@@ -1,3 +1,5 @@
+import datetime
+from decimal import Decimal
 from django.db import models
 
 
@@ -6,9 +8,9 @@ class HotelSettings(models.Model):
     hotel_address = models.TextField(default="1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402")
     hotel_phone = models.CharField(max_length=20, default="+91 9444551122")
     hotel_email = models.EmailField(default="sriaskresidency@gmail.com")
-    check_in_time = models.TimeField(default="12:00")
-    check_out_time = models.TimeField(default="12:00")
-    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=18.00)
+    check_in_time = models.TimeField(default=datetime.time(12, 0))
+    check_out_time = models.TimeField(default=datetime.time(12, 0))
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("18.00"))
     cancellation_policy = models.TextField(
         default="All cancellations are handled by the hotel team. Please contact us directly."
     )
