@@ -33,9 +33,5 @@ class PublicHotelSettingsView(APIView):
 
     def get(self, request):
         settings = HotelSettings.get_settings()
-<<<<<<< HEAD
         serializer = PublicHotelSettingsSerializer(settings)
         return Response(serializer.data)
-=======
-        return Response(HotelSettingsSerializer(settings).data)
->>>>>>> 04ad70df43b589a44696f476e856248f5b1582d5

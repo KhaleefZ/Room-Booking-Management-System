@@ -45,11 +45,7 @@ export default function BookingForm() {
   ];
 
   const { data: roomsData } = useQuery({
-<<<<<<< HEAD
     queryKey: ["rooms-all"],
-=======
-    queryKey: ["rooms-available"],
->>>>>>> 04ad70df43b589a44696f476e856248f5b1582d5
     queryFn: () => getRooms({}),
   });
 
