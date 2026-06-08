@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { getBookings } from "../../api/bookings";
+import { getBookings, downloadInvoice } from "../../api/bookings";
 import StatusBadge from "../../components/ui/StatusBadge";
 import Spinner from "../../components/ui/Spinner";
+import toast from "react-hot-toast";
 
 const STATUSES = ["", "Pending", "Confirmed", "CheckedIn", "CheckedOut", "Cancelled"];
 
@@ -108,9 +109,25 @@ export default function BookingList() {
                       <StatusBadge status={b.status} />
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link to={`/bookings/${b.id}`} className="p-2 hover:bg-brand-50 rounded-lg text-brand-600 transition-colors inline-block font-bold text-xs uppercase tracking-widest">
-                        Manage →
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        {["Confirmed", "CheckedIn", "CheckedOut"].includes(b.status) && (
+                          <button
+                            onClick={() => {
+                              toast.promise(downloadInvoice(b.id), {
+                                loading: 'Preparing invoice...',
+                                success: 'Invoice downloaded!',
+                                error: 'Failed to generate invoice'
+                              });
+                            }}
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all"
+                          >
+                            Invoice ↓
+                          </button>
+                        )}
+                        <Link to={`/bookings/${b.id}`} className="p-2 hover:bg-brand-50 rounded-lg text-brand-600 transition-colors inline-block font-bold text-xs uppercase tracking-widest">
+                          Manage →
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

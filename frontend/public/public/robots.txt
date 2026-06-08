@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /rooms
+Allow: /gallery
+Allow: /about
+Allow: /contact
+Disallow: /book
+Disallow: /booking/confirmation
+Disallow: /api/
+
+Sitemap: https://sriaskresidency.com/sitemap.xml

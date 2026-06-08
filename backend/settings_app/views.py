@@ -3,15 +3,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from .models import HotelSettings
-from .serializers import HotelSettingsSerializer
+from .serializers import HotelSettingsSerializer, PublicHotelSettingsSerializer
 
 
 class HotelSettingsView(APIView):
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAuthenticated()]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         settings = HotelSettings.get_settings()
@@ -29,4 +25,13 @@ class HotelSettingsView(APIView):
         serializer = HotelSettingsSerializer(settings, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(serializer.data)
+
+
+class PublicHotelSettingsView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        settings = HotelSettings.get_settings()
+        serializer = PublicHotelSettingsSerializer(settings)
         return Response(serializer.data)

@@ -45,8 +45,8 @@ export default function BookingForm() {
   ];
 
   const { data: roomsData } = useQuery({
-    queryKey: ["rooms-available"],
-    queryFn: () => getRooms({ status: "Available" }),
+    queryKey: ["rooms-all"],
+    queryFn: () => getRooms({}),
   });
 
   const { data: guestsData } = useQuery({
@@ -59,11 +59,15 @@ export default function BookingForm() {
 
   const mutation = useMutation({
     mutationFn: createBooking,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Booking created successfully!");
       qc.invalidateQueries(["bookings-list"]);
       qc.invalidateQueries(["rooms-dashboard"]);
-      navigate("/bookings");
+      if (data?.id) {
+        navigate(`/bookings/${data.id}`);
+      } else {
+        navigate("/bookings");
+      }
     },
     onError: (err) => {
       const errorData = err.response?.data;
@@ -244,9 +248,11 @@ export default function BookingForm() {
                 className="input-field w-full h-11"
                 required
               >
-                <option value="">-- Available Rooms --</option>
+                <option value="">-- All Rooms --</option>
                 {rooms.map(r => (
-                  <option key={r.id} value={r.id}>Room {r.room_number} - ₹{r.base_price}/night</option>
+                  <option key={r.id} value={r.id}>
+                    Room {r.room_number} ({r.status}) - ₹{r.base_price}/night
+                  </option>
                 ))}
               </select>
             </div>

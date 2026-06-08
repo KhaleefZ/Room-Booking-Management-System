@@ -122,6 +122,20 @@ export default function BookingDetail() {
             </div>
           </div>
           <div className="flex gap-3">
+             {["Confirmed", "CheckedIn", "CheckedOut"].includes(booking.status) && (
+                <button
+                  onClick={() => {
+                    toast.promise(downloadInvoice(booking.id), {
+                      loading: 'Preparing formal invoice PDF...',
+                      success: 'Invoice downloaded successfully',
+                      error: 'Failed to generate PDF'
+                    });
+                  }}
+                  className="px-6 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all shadow-lg shadow-gray-100 active:scale-95"
+                >
+                  Download Invoice ↓
+                </button>
+             )}
              {allowed.map((s) => (
                 <button
                   key={s}
