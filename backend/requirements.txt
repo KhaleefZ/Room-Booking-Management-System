@@ -12,4 +12,6 @@ python-decouple==3.*
 Pillow==10.*
 django-filter==23.*
 whitenoise==6.*
-dj-database-url==2.*
+dj-database-url==2.*xhtml2pdf==0.2.17
+xhtml2pdf==0.2.17
+xhtml2pdf==0.2.17
