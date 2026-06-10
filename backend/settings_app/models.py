@@ -5,7 +5,7 @@ from django.db import models
 
 class HotelSettings(models.Model):
     hotel_name = models.CharField(max_length=200, default="Sri ASK Residency")
-    hotel_address = models.TextField(default="1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402")
+    hotel_address = models.TextField(default="1, Karaya Rayappa Thevar Street, Sulur, Coimbatore - 641402")
     hotel_phone = models.CharField(max_length=20, default="+91 9444551122")
     hotel_email = models.EmailField(default="sriaskresidency@gmail.com")
     check_in_time = models.TimeField(default=datetime.time(12, 0))

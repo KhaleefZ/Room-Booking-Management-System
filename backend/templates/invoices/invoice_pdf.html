@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <style>
@@ -7,6 +8,7 @@
             size: a4;
             margin: 1.2cm;
         }
+
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             color: #1e293b;
@@ -15,21 +17,26 @@
             margin: 0;
             padding: 0;
         }
+
         .header-table {
             width: 100%;
             margin-bottom: 15px;
         }
+
         .header-table td {
             padding-bottom: 12px;
             vertical-align: top;
         }
+
         .logo-cell {
             width: 55%;
         }
+
         .logo-img {
             width: 160px;
             height: auto;
         }
+
         .logo-tagline {
             font-size: 8pt;
             font-weight: bold;
@@ -38,6 +45,7 @@
             letter-spacing: 0.5px;
             padding-left: 4px;
         }
+
         .contact-cell {
             width: 45%;
             text-align: right;
@@ -46,16 +54,18 @@
             line-height: 1.4;
             font-weight: bold;
         }
+
         .icon {
             color: #c29a5b;
             font-size: 9.5pt;
         }
-        
+
         .invoice-title-table {
             width: 100%;
             margin-top: 15px;
             margin-bottom: 15px;
         }
+
         .invoice-title-cell {
             width: 50%;
             font-size: 22pt;
@@ -64,6 +74,7 @@
             letter-spacing: 2px;
             vertical-align: middle;
         }
+
         .invoice-meta-cell {
             width: 50%;
             text-align: right;
@@ -72,20 +83,23 @@
             line-height: 1.4;
             vertical-align: middle;
         }
+
         .invoice-number {
             font-weight: bold;
             color: #0f172a;
             font-size: 11pt;
         }
-        
+
         .summary-table {
             width: 100%;
             margin-bottom: 15px;
         }
+
         .summary-col {
             width: 50%;
             vertical-align: top;
         }
+
         .section-title {
             font-size: 8.5pt;
             font-weight: bold;
@@ -96,23 +110,26 @@
             padding-bottom: 3px;
             letter-spacing: 0.5px;
         }
+
         .info-row {
             margin-bottom: 4px;
             font-size: 9pt;
         }
+
         .info-label {
             font-weight: bold;
             color: #475569;
             width: 90px;
             display: inline-block;
         }
-        
+
         .items-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
             margin-bottom: 15px;
         }
+
         .items-table th {
             background-color: #f8fafc;
             text-align: left;
@@ -123,33 +140,39 @@
             border-bottom: 2px solid #c29a5b;
             text-transform: uppercase;
         }
+
         .items-table td {
             padding: 10px;
             border-bottom: 1px solid #f1f5f9;
             font-size: 9.5pt;
             color: #0f172a;
         }
+
         .amount-cell {
             text-align: right;
         }
-        
+
         .totals-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
         }
+
         .totals-table td {
             padding: 5px 0;
             font-size: 9.5pt;
         }
+
         .total-label {
             color: #64748b;
             text-align: left;
         }
+
         .total-value {
             text-align: right;
             font-weight: bold;
         }
+
         .grand-total-row td {
             padding-top: 6px;
             padding-bottom: 6px;
@@ -157,7 +180,7 @@
             font-weight: bold !important;
             color: #3b1612;
         }
-        
+
         .terms {
             margin-top: 10px;
             font-size: 7.5pt;
@@ -168,18 +191,38 @@
             border: 1px solid #f1f5f9;
             line-height: 1.4;
         }
-        
+
         /* Letterhead Footer similar to billing.pdf */
         .footer-color-bar {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-        .footer-cell-1 { background-color: #3b1612; height: 12px; width: 25%; }
-        .footer-cell-2 { background-color: #52201b; height: 12px; width: 25%; }
-        .footer-cell-3 { background-color: #270d0a; height: 12px; width: 25%; }
-        .footer-cell-4 { background-color: #3b1612; height: 12px; width: 25%; }
-        
+
+        .footer-cell-1 {
+            background-color: #3b1612;
+            height: 12px;
+            width: 25%;
+        }
+
+        .footer-cell-2 {
+            background-color: #52201b;
+            height: 12px;
+            width: 25%;
+        }
+
+        .footer-cell-3 {
+            background-color: #270d0a;
+            height: 12px;
+            width: 25%;
+        }
+
+        .footer-cell-4 {
+            background-color: #3b1612;
+            height: 12px;
+            width: 25%;
+        }
+
         .hotel-footer-text {
             text-align: center;
             font-size: 7.5pt;
@@ -189,29 +232,38 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <table class="header-table">
         <tr>
             <td class="logo-cell">
                 {% if logo_base64 %}
-                    <img src="data:image/png;base64,{{ logo_base64 }}" class="logo-img" />
+                <img src="data:image/png;base64,{{ logo_base64 }}" class="logo-img" />
                 {% else %}
-                    <span style="font-size: 18pt; font-weight: bold; color: #3b1612; text-transform: uppercase;">{{ hotel_name }}</span>
-                {% endif %}
-                <br/>
+                <span style="font-size: 18pt; font-weight: bold; color: #3b1612; text-transform: uppercase;">{{
+                    hotel_name }}</span>
                 <span class="logo-tagline" style="display: block; margin-top: 5px;">A/C ROOMS WITH VALET PARKING</span>
+                {% endif %}
             </td>
             <td class="contact-cell">
-                #10 Karaya Rayappa Thevar Street,<br/>
-                Sulur, Coimbatore - 641 402.<br/>
-                +91 94 44 55 11 22 {% if phone_base64 %}<img src="data:image/png;base64,{{ phone_base64 }}" style="width: 10px; height: 10px; vertical-align: middle; margin-left: 2px;" />{% else %}<span class="icon">&#9742;</span>{% endif %}<br/>
-                sriaskresidency@gmail.com {% if email_base64 %}<img src="data:image/png;base64,{{ email_base64 }}" style="width: 10px; height: 10px; vertical-align: middle; margin-left: 2px;" />{% else %}<span class="icon">&#9993;</span>{% endif %}<br/>
-                sriaskresidency.com {% if globe_base64 %}<img src="data:image/png;base64,{{ globe_base64 }}" style="width: 10px; height: 10px; vertical-align: middle; margin-left: 2px;" />{% else %}<span class="icon">&#9784;</span>{% endif %}
+                1 Karaya Rayappa Thevar Street,<br />
+                Sulur, Coimbatore - 641 402.<br />
+                +91 94 44 55 11 22 {% if phone_base64 %}<img src="data:image/png;base64,{{ phone_base64 }}"
+                    style="width: 10px; height: 10px; vertical-align: middle; margin-left: 2px;" />{% else %}<span
+                    class="icon">&#9742;</span>{% endif %}<br />
+                sriaskresidency@gmail.com {% if email_base64 %}<img src="data:image/png;base64,{{ email_base64 }}"
+                    style="width: 10px; height: 10px; vertical-align: middle; margin-left: 2px;" />{% else %}<span
+                    class="icon">&#9993;</span>{% endif %}<br />
+                sriaskresidency.com {% if globe_base64 %}<img src="data:image/png;base64,{{ globe_base64 }}"
+                    style="width: 10px; height: 10px; vertical-align: middle; margin-left: 2px;" />{% else %}<span
+                    class="icon">&#9784;</span>{% endif %}
             </td>
         </tr>
         <tr>
-            <td colspan="2" style="border-bottom: 3px solid #c29a5b; line-height: 4px; font-size: 1px; height: 4px; padding: 0;">&nbsp;</td>
+            <td colspan="2"
+                style="border-bottom: 3px solid #c29a5b; line-height: 4px; font-size: 1px; height: 4px; padding: 0;">
+                &nbsp;</td>
         </tr>
     </table>
 
@@ -220,7 +272,7 @@
         <tr>
             <td class="invoice-title-cell">INVOICE</td>
             <td class="invoice-meta-cell">
-                <span class="invoice-number">Invoice No: {{ invoice.invoice_number }}</span><br/>
+                <span class="invoice-number">Invoice No: {{ invoice.invoice_number }}</span><br />
                 Date of Issue: {{ invoice.issue_date|date:"d M Y" }}
             </td>
         </tr>
@@ -233,13 +285,25 @@
                 <div class="section-title">Billing Information</div>
                 <div style="font-size: 11pt; font-weight: bold; color: #0f172a; margin-bottom: 3px;">{{ invoice.guest_name }}</div>
                 <div style="color: #475569; font-size: 9pt;">Email: {{ invoice.guest_email }}</div>
+                {% if invoice.guest_phone %}
+                <div style="color: #475569; font-size: 9pt; margin-top: 2px;">Phone: {{ invoice.guest_phone }}</div>
+                {% endif %}
+                {% if invoice.guest_address %}
+                <div style="color: #475569; font-size: 9pt; margin-top: 2px;">Address: {{ invoice.guest_address }}</div>
+                {% endif %}
             </td>
             <td class="summary-col" style="padding-left: 20px;">
                 <div class="section-title">Stay Details</div>
-                <div class="info-row"><span class="info-label">Check-in:</span> {{ invoice.check_in|date:"D, d M Y" }} at {{ check_in_time|default:"12:00 PM" }}</div>
-                <div class="info-row"><span class="info-label">Check-out:</span> {{ invoice.check_out|date:"D, d M Y" }} at {{ check_out_time|default:"12:00 PM" }}</div>
+                <div class="info-row"><span class="info-label">Check-in:</span> {{ invoice.check_in|date:"D, d M Y" }}
+                    at {{ check_in_time|default:"12:00 PM" }}</div>
+                <div class="info-row"><span class="info-label">Check-out:</span> {{ invoice.check_out|date:"D, d M Y" }}
+                    at {{ check_out_time|default:"12:00 PM" }}</div>
                 <div class="info-row"><span class="info-label">Duration:</span> {{ invoice.nights }} Night(s)</div>
+                {% if invoice.booking %}
                 <div class="info-row"><span class="info-label">Room Details:</span> {{ invoice.room_details }}</div>
+                {% else %}
+                <div class="info-row"><span class="info-label">Room Count:</span> {{ invoice.room_count }} Room(s)</div>
+                {% endif %}
             </td>
         </tr>
     </table>
@@ -253,17 +317,29 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>
-                    <strong>Accommodation Service</strong><br/>
-                    <span style="font-size: 8pt; color: #64748b;">{{ invoice.room_details }} | Base Stay</span>
-                </td>
-                <td class="amount-cell">{{ invoice.base_amount }}</td>
-            </tr>
+            {% if rooms_list %}
+                {% for r in rooms_list %}
+                <tr>
+                    <td>
+                        <strong>Accommodation Service</strong><br />
+                        <span style="font-size: 8pt; color: #64748b;">{{ r.name }} | Base Stay</span>
+                    </td>
+                    <td class="amount-cell">{{ r.price }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>
+                        <strong>Accommodation Service</strong><br />
+                        <span style="font-size: 8pt; color: #64748b;">{{ invoice.room_details }} | Base Stay</span>
+                    </td>
+                    <td class="amount-cell">{{ invoice.base_amount }}</td>
+                </tr>
+            {% endif %}
             {% if invoice.discount_amount > 0 %}
             <tr>
                 <td style="color: #b91c1c;">
-                    <strong>Promotional Discount</strong><br/>
+                    <strong>Promotional Discount</strong><br />
                     <span style="font-size: 8pt;">Special offer applied</span>
                 </td>
                 <td class="amount-cell" style="color: #b91c1c;">- {{ invoice.discount_amount }}</td>
@@ -283,7 +359,9 @@
             <td class="total-value">{{ invoice.tax_amount }}</td>
         </tr>
         <tr>
-            <td colspan="2" style="border-top: 2px solid #c29a5b; line-height: 8px; font-size: 1px; height: 8px; padding: 0;">&nbsp;</td>
+            <td colspan="2"
+                style="border-top: 2px solid #c29a5b; line-height: 8px; font-size: 1px; height: 8px; padding: 0;">&nbsp;
+            </td>
         </tr>
         <tr class="grand-total-row">
             <td>Grand Total</td>
@@ -294,9 +372,9 @@
     <!-- Terms & Conditions -->
     <div class="terms">
         <div style="font-weight: bold; margin-bottom: 3px; color: #3b1612;">Terms & Conditions</div>
-        1. All bills are payable on demand.<br/>
-        2. This is a computer-generated document and does not require a physical signature.<br/>
-        3. Goods & Services Tax (GST) has been applied as per Government of India regulations.<br/>
+        1. All bills are payable on demand.<br />
+        2. This is a computer-generated document and does not require a physical signature.<br />
+        3. Goods & Services Tax (GST) has been applied as per Government of India regulations.<br />
         4. For any queries regarding this invoice, please contact our support team.
     </div>
 
@@ -309,9 +387,10 @@
             <td class="footer-cell-4"></td>
         </tr>
     </table>
-    
+
     <div class="hotel-footer-text">
         {{ hotel_name }} · {{ hotel_address }}
     </div>
 </body>
+
 </html>

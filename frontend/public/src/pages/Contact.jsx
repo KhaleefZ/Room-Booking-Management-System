@@ -11,7 +11,7 @@ export default function Contact() {
   });
 
   const contactItems = [
-    { icon: "📍", label: "Address", value: settings?.hotel_address || "1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402" },
+    { icon: "📍", label: "Address", value: settings?.hotel_address || "1, Karaya Rayappa Thevar Street, Sulur, Coimbatore - 641402" },
     { icon: "📞", label: "Phone", value: settings?.hotel_phone || "+91 9444551122" },
     { icon: "✉️", label: "Email", value: settings?.hotel_email || "sriaskresidency@gmail.com" },
     { icon: "🕐", label: "Check-in / Check-out", value: `${settings?.check_in_time?.slice(0, 5) || "12:00"} / ${settings?.check_out_time?.slice(0, 5) || "12:00"}` },

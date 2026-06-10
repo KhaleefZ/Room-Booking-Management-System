@@ -14,6 +14,8 @@ import Reports from "./pages/reports/Reports";
 import Promos from "./pages/Promos";
 import Settings from "./pages/Settings";
 import ContactMessages from "./pages/contacts/ContactMessages";
+import InvoiceList from "./pages/invoices/InvoiceList";
+import InvoiceForm from "./pages/invoices/InvoiceForm";
 
 export default function App() {
   return (
@@ -27,6 +29,8 @@ export default function App() {
         <Route path="/bookings" element={<BookingList />} />
         <Route path="/bookings/new" element={<BookingForm />} />
         <Route path="/bookings/:id" element={<BookingDetail />} />
+        <Route path="/invoices" element={<InvoiceList />} />
+        <Route path="/invoices/new" element={<InvoiceForm />} />
         <Route path="/guests" element={<GuestList />} />
         <Route path="/guests/new" element={<GuestForm />} />
         <Route path="/guests/:id" element={<GuestDetail />} />

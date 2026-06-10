@@ -15,7 +15,9 @@ def generate_invoice_pdf(invoice):
     from PIL import Image, ImageDraw
     logo_base64 = ""
     try:
-        logo_path = os.path.join(settings.BASE_DIR.parent, 'frontend', 'public', 'src', 'assets', 'Nav Logo.png')
+        logo_path = os.path.join(settings.BASE_DIR.parent, 'frontend', 'public', 'src', 'assets', 'Invoice Logo.png')
+        if not os.path.exists(logo_path):
+            logo_path = os.path.join(settings.BASE_DIR, 'bookings', 'Invoice Logo.png')
         with open(logo_path, 'rb') as f:
             logo_base64 = base64.b64encode(f.read()).decode('utf-8')
     except Exception as e:
@@ -25,7 +27,7 @@ def generate_invoice_pdf(invoice):
     try:
         img = Image.new('RGBA', (16, 16), (255, 255, 255, 0))
         draw = ImageDraw.Draw(img)
-        gold = (194, 154, 91, 255)
+        gold = (166, 124, 82, 255)
         draw.ellipse([1, 1, 14, 14], outline=gold, width=1)
         draw.line([1, 7, 14, 7], fill=gold, width=1)
         draw.line([7, 1, 7, 14], fill=gold, width=1)
@@ -41,7 +43,7 @@ def generate_invoice_pdf(invoice):
     try:
         img = Image.new('RGBA', (16, 16), (255, 255, 255, 0))
         draw = ImageDraw.Draw(img)
-        gold = (194, 154, 91, 255)
+        gold = (166, 124, 82, 255)
         draw.line([4, 11, 11, 4], fill=gold, width=2)
         draw.ellipse([2, 10, 6, 14], fill=gold)
         draw.ellipse([10, 2, 14, 6], fill=gold)
@@ -56,7 +58,7 @@ def generate_invoice_pdf(invoice):
     try:
         img = Image.new('RGBA', (16, 16), (255, 255, 255, 0))
         draw = ImageDraw.Draw(img)
-        gold = (194, 154, 91, 255)
+        gold = (166, 124, 82, 255)
         draw.rectangle([1, 4, 14, 12], outline=gold, width=1)
         draw.line([1, 4, 7, 8], fill=gold, width=1)
         draw.line([14, 4, 7, 8], fill=gold, width=1)
@@ -66,6 +68,13 @@ def generate_invoice_pdf(invoice):
         email_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
     except Exception as e:
         pass
+
+    from decimal import Decimal
+    rooms = [r.strip() for r in invoice.room_details.split(",") if r.strip()]
+    num_rooms = len(rooms) if rooms else 1
+    base_amount = Decimal(str(invoice.base_amount))
+    price_per_room = (base_amount / num_rooms).quantize(Decimal("0.01"))
+    rooms_list = [{'name': r, 'price': price_per_room} for r in rooms]
 
     context = {
         'invoice': invoice,
@@ -80,7 +89,8 @@ def generate_invoice_pdf(invoice):
         'logo_base64': logo_base64,
         'globe_base64': globe_base64,
         'phone_base64': phone_base64,
-        'email_base64': email_base64
+        'email_base64': email_base64,
+        'rooms_list': rooms_list,
     }
     
     # Create a Django response object, and specify content_type as pdf

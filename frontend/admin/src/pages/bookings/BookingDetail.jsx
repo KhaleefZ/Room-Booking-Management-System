@@ -122,7 +122,7 @@ export default function BookingDetail() {
             </div>
           </div>
           <div className="flex gap-3">
-             {["Confirmed", "CheckedIn", "CheckedOut"].includes(booking.status) && (
+             {/* {["Confirmed", "CheckedIn", "CheckedOut"].includes(booking.status) && (
                 <button
                   onClick={() => {
                     toast.promise(downloadInvoice(booking.id), {
@@ -135,7 +135,7 @@ export default function BookingDetail() {
                 >
                   Download Invoice ↓
                 </button>
-             )}
+             )} */}
              {allowed.map((s) => (
                 <button
                   key={s}

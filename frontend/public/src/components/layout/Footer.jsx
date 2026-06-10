@@ -46,7 +46,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-3">Contact</h4>
             <ul className="space-y-2 text-sm">
-              <li>📍 {settings?.hotel_address || "1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402"}</li>
+              <li>📍 {settings?.hotel_address || "1, Karaya Rayappa Thevar Street, Sulur, Coimbatore - 641402"}</li>
               <li>📞 {settings?.hotel_phone || "+91 9444551122"}</li>
               <li>✉️ {settings?.hotel_email || "sriaskresidency@gmail.com"}</li>
               <li>🕐 Check-in: {settings?.check_in_time?.slice(0, 5) || "12:00"} | Check-out: {settings?.check_out_time?.slice(0, 5) || "12:00"}</li>

@@ -110,7 +110,7 @@ export default function BookingList() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {["Confirmed", "CheckedIn", "CheckedOut"].includes(b.status) && (
+                        {/* {["Confirmed", "CheckedIn", "CheckedOut"].includes(b.status) && (
                           <button
                             onClick={() => {
                               toast.promise(downloadInvoice(b.id), {
@@ -123,7 +123,7 @@ export default function BookingList() {
                           >
                             Invoice ↓
                           </button>
-                        )}
+                        )} */}
                         <Link to={`/bookings/${b.id}`} className="p-2 hover:bg-brand-50 rounded-lg text-brand-600 transition-colors inline-block font-bold text-xs uppercase tracking-widest">
                           Manage →
                         </Link>

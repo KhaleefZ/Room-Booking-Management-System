@@ -60,6 +60,8 @@ class BookingViewSet(viewsets.ModelViewSet):
             defaults={
                 "guest_name": booking.guest.full_name,
                 "guest_email": booking.guest.email,
+                "guest_phone": booking.guest.phone,
+                "guest_address": booking.guest.address,
                 "room_details": f"{booking.room.room_type} - Room {booking.room.room_number}",
                 "check_in": booking.check_in,
                 "check_out": booking.check_out,
@@ -106,6 +108,8 @@ class BookingViewSet(viewsets.ModelViewSet):
                         booking=booking,
                         guest_name=booking.guest.full_name,
                         guest_email=booking.guest.email,
+                        guest_phone=booking.guest.phone,
+                        guest_address=booking.guest.address,
                         room_details=f"Unit {booking.room.room_number} ({booking.room.room_type})",
                         check_in=booking.check_in,
                         check_out=booking.check_out,
@@ -148,7 +152,9 @@ class BookingViewSet(viewsets.ModelViewSet):
             from PIL import Image, ImageDraw
             logo_base64 = ""
             try:
-                logo_path = os.path.join(settings.BASE_DIR.parent, 'frontend', 'public', 'src', 'assets', 'Nav Logo.png')
+                logo_path = os.path.join(settings.BASE_DIR.parent, 'frontend', 'public', 'src', 'assets', 'Invoice Logo.png')
+                if not os.path.exists(logo_path):
+                    logo_path = os.path.join(settings.BASE_DIR, 'bookings', 'Invoice Logo.png')
                 with open(logo_path, 'rb') as f:
                     logo_base64 = base64.b64encode(f.read()).decode('utf-8')
             except Exception as e:
@@ -158,7 +164,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             try:
                 img = Image.new('RGBA', (16, 16), (255, 255, 255, 0))
                 draw = ImageDraw.Draw(img)
-                gold = (194, 154, 91, 255)
+                gold = (166, 124, 82, 255)
                 draw.ellipse([1, 1, 14, 14], outline=gold, width=1)
                 draw.line([1, 7, 14, 7], fill=gold, width=1)
                 draw.line([7, 1, 7, 14], fill=gold, width=1)
@@ -174,7 +180,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             try:
                 img = Image.new('RGBA', (16, 16), (255, 255, 255, 0))
                 draw = ImageDraw.Draw(img)
-                gold = (194, 154, 91, 255)
+                gold = (166, 124, 82, 255)
                 draw.line([4, 11, 11, 4], fill=gold, width=2)
                 draw.ellipse([2, 10, 6, 14], fill=gold)
                 draw.ellipse([10, 2, 14, 6], fill=gold)
@@ -189,7 +195,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             try:
                 img = Image.new('RGBA', (16, 16), (255, 255, 255, 0))
                 draw = ImageDraw.Draw(img)
-                gold = (194, 154, 91, 255)
+                gold = (166, 124, 82, 255)
                 draw.rectangle([1, 4, 14, 12], outline=gold, width=1)
                 draw.line([1, 4, 7, 8], fill=gold, width=1)
                 draw.line([14, 4, 7, 8], fill=gold, width=1)
@@ -199,6 +205,13 @@ class BookingViewSet(viewsets.ModelViewSet):
                 email_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
             except Exception as e:
                 pass
+
+            from decimal import Decimal
+            rooms = [r.strip() for r in invoice.room_details.split(",") if r.strip()]
+            num_rooms = len(rooms) if rooms else 1
+            base_amount = Decimal(str(invoice.base_amount))
+            price_per_room = (base_amount / num_rooms).quantize(Decimal("0.01"))
+            rooms_list = [{'name': r, 'price': price_per_room} for r in rooms]
 
             context = {
                 'invoice': invoice,
@@ -213,7 +226,8 @@ class BookingViewSet(viewsets.ModelViewSet):
                 'logo_base64': logo_base64,
                 'globe_base64': globe_base64,
                 'phone_base64': phone_base64,
-                'email_base64': email_base64
+                'email_base64': email_base64,
+                'rooms_list': rooms_list
             }
             
             template = get_template('invoices/invoice_pdf.html')
@@ -245,3 +259,124 @@ class BookingViewSet(viewsets.ModelViewSet):
             send_admin_notification.delay(updated.id)
 
         return Response(BookingDetailSerializer(updated).data)
+
+
+class InvoiceViewSet(viewsets.ModelViewSet):
+    queryset = Invoice.objects.all()
+    serializer_class = InvoiceSerializer
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=True, methods=["get"])
+    def download(self, request, pk=None):
+        invoice = self.get_object()
+        
+        try:
+            if not invoice.pdf_file or not invoice.pdf_generated:
+                from .utils import generate_invoice_pdf
+                generate_invoice_pdf(invoice)
+                invoice.refresh_from_db()
+
+            from django.template.loader import get_template
+            from xhtml2pdf import pisa
+            from io import BytesIO
+            from django.http import HttpResponse
+            from django.conf import settings
+            from settings_app.models import HotelSettings
+
+            hotel = HotelSettings.get_settings()
+            
+            import os
+            import base64
+            from PIL import Image, ImageDraw
+            
+            logo_base64 = ""
+            try:
+                logo_path = os.path.join(settings.BASE_DIR.parent, 'frontend', 'public', 'src', 'assets', 'Invoice Logo.png')
+                if not os.path.exists(logo_path):
+                    logo_path = os.path.join(settings.BASE_DIR, 'bookings', 'Invoice Logo.png')
+                with open(logo_path, 'rb') as f:
+                    logo_base64 = base64.b64encode(f.read()).decode('utf-8')
+            except Exception:
+                pass
+
+            globe_base64 = ""
+            try:
+                img = Image.new('RGBA', (16, 16), (255, 255, 255, 0))
+                draw = ImageDraw.Draw(img)
+                gold = (166, 124, 82, 255)
+                draw.ellipse([1, 1, 14, 14], outline=gold, width=1)
+                draw.line([1, 7, 14, 7], fill=gold, width=1)
+                draw.line([7, 1, 7, 14], fill=gold, width=1)
+                draw.ellipse([4, 1, 11, 14], outline=gold, width=1)
+                
+                buffered = BytesIO()
+                img.save(buffered, format="PNG")
+                globe_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            except Exception:
+                pass
+
+            phone_base64 = ""
+            try:
+                img = Image.new('RGBA', (16, 16), (255, 255, 255, 0))
+                draw = ImageDraw.Draw(img)
+                gold = (166, 124, 82, 255)
+                draw.line([4, 11, 11, 4], fill=gold, width=2)
+                draw.ellipse([2, 10, 6, 14], fill=gold)
+                draw.ellipse([10, 2, 14, 6], fill=gold)
+                
+                buffered = BytesIO()
+                img.save(buffered, format="PNG")
+                phone_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            except Exception:
+                pass
+
+            email_base64 = ""
+            try:
+                img = Image.new('RGBA', (16, 16), (255, 255, 255, 0))
+                draw = ImageDraw.Draw(img)
+                gold = (166, 124, 82, 255)
+                draw.rectangle([1, 4, 14, 12], outline=gold, width=1)
+                draw.line([1, 4, 7, 8], fill=gold, width=1)
+                draw.line([14, 4, 7, 8], fill=gold, width=1)
+                
+                buffered = BytesIO()
+                img.save(buffered, format="PNG")
+                email_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            except Exception:
+                pass
+
+            from decimal import Decimal
+            rooms = [r.strip() for r in invoice.room_details.split(",") if r.strip()]
+            num_rooms = len(rooms) if rooms else 1
+            base_amount = Decimal(str(invoice.base_amount))
+            price_per_room = (base_amount / num_rooms).quantize(Decimal("0.01"))
+            rooms_list = [{'name': r, 'price': price_per_room} for r in rooms]
+
+            context = {
+                'invoice': invoice,
+                'hotel_name': hotel.hotel_name,
+                'hotel_address': hotel.hotel_address,
+                'hotel_contact': f"{hotel.hotel_phone} | {hotel.hotel_email}",
+                'check_in_time': hotel.check_in_time.strftime("%I:%M %p"),
+                'check_out_time': hotel.check_out_time.strftime("%I:%M %p"),
+                'tax_rate': hotel.tax_rate,
+                'is_formal': True,
+                'logo_base64': logo_base64,
+                'globe_base64': globe_base64,
+                'phone_base64': phone_base64,
+                'email_base64': email_base64,
+                'rooms_list': rooms_list
+            }
+            
+            template = get_template('invoices/invoice_pdf.html')
+            html = template.render(context)
+            
+            result = BytesIO()
+            pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+            
+            response = HttpResponse(result.getvalue(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="Invoice_{invoice.invoice_number}.pdf"'
+            return response
+
+        except Exception as e:
+            return Response({"error": f"Invoice generation error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

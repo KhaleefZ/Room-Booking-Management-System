@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='hotelsettings',
             name='hotel_address',
-            field=models.TextField(default='1, Karaya Rayappa, Thevar Street, Sulur, Coimbatore - 641402'),
+            field=models.TextField(default='1, Karaya Rayappa Thevar Street, Sulur, Coimbatore - 641402'),
         ),
         migrations.AddField(
             model_name='hotelsettings',

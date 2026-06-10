@@ -12,19 +12,22 @@ import {
   LineChart, 
   Mail, 
   Settings,
-  LogOut
+  LogOut,
+  ReceiptText
 } from "lucide-react";
 
 const NAV = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard", sub: "Logistics" },
   { to: "/rooms", icon: Warehouse, label: "Inventory", sub: "Rooms" },
   { to: "/bookings", icon: CalendarDays, label: "Bookings", sub: "Ledger" },
+  { to: "/invoices", icon: ReceiptText, label: "Invoices", sub: "Manual Billing" },
   { to: "/guests", icon: Users, label: "Accounts", sub: "Guest Accounts" },
   { to: "/promos", icon: Ticket, label: "Marketing", sub: "Access Tokens" },
   { to: "/reports", icon: LineChart, label: "Analytics", sub: "Audit" },
   { to: "/contacts", icon: Mail, label: "Inquiries", sub: "Web Messages" },
   { to: "/settings", icon: Settings, label: "Settings", sub: "Configuration" },
 ];
+
 
 export default function Sidebar() {
   const { logout } = useAuthStore();
