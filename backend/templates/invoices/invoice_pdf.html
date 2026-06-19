@@ -49,18 +49,17 @@
         .gst-no {
             font-size: 8.5pt;
             font-weight: bold;
-            color: #3b1612;
+            color: #4E342E !important;
             margin-top: 5px;
             letter-spacing: 0.5px;
             padding-left: 4px;
-            display: block;
         }
 
         .contact-cell {
             width: 45%;
             text-align: right;
             font-size: 8.5pt;
-            color: #3b1612;
+            color: #362C28;
             line-height: 1.4;
             font-weight: bold;
         }
@@ -247,17 +246,16 @@
     <!-- Header -->
     <table class="header-table">
         <tr>
-            <td class="logo-cell">
+            <td class="logo-cell" style="color: #362C28;">
                 {% if logo_base64 %}
                 <img src="data:image/png;base64,{{ logo_base64 }}" class="logo-img" />
                 {% else %}
-                <span style="font-size: 18pt; font-weight: bold; color: #3b1612; text-transform: uppercase;">{{
-                    hotel_name }}</span>
+                <span style="font-size: 18pt; font-weight: bold; color: #3b1612; text-transform: uppercase;">{{ hotel_name }}</span>
                 <span class="logo-tagline" style="display: block; margin-top: 5px;">A/C ROOMS WITH VALET PARKING</span>
                 {% endif %}
-                <span class="gst-no">GST No: 33ACYPT6253G1Z0</span>
+                <div class="gst-no" style="font-size: 8.5pt; font-weight: bold; color: #4E342E; margin-top: 15px; letter-spacing: 0.5px; padding-left: 4px;"><font color="#4E342E">GST No: 33ACYPT6253G1Z0</font></div>
             </td>
-            <td class="contact-cell">
+            <td class="contact-cell" style="color: #362C28;">
                 1 Karaya Rayappa Thevar Street,<br />
                 Sulur, Coimbatore - 641 402.<br />
                 +91 94 44 55 11 22 {% if phone_base64 %}<img src="data:image/png;base64,{{ phone_base64 }}"
@@ -329,23 +327,23 @@
         </thead>
         <tbody>
             {% if rooms_list %}
-                {% for r in rooms_list %}
-                <tr>
-                    <td>
-                        <strong>Accommodation Service</strong><br />
-                        <span style="font-size: 8pt; color: #64748b;">{{ r.name }} | Base Stay</span>
-                    </td>
-                    <td class="amount-cell">{{ r.price }}</td>
-                </tr>
-                {% endfor %}
+            {% for r in rooms_list %}
+            <tr>
+                <td>
+                    <strong>Accommodation Service</strong><br />
+                    <span style="font-size: 8pt; color: #64748b;">{{ r.name }} | Base Stay</span>
+                </td>
+                <td class="amount-cell">{{ r.price }}</td>
+            </tr>
+            {% endfor %}
             {% else %}
-                <tr>
-                    <td>
-                        <strong>Accommodation Service</strong><br />
-                        <span style="font-size: 8pt; color: #64748b;">{{ invoice.room_details }} | Base Stay</span>
-                    </td>
-                    <td class="amount-cell">{{ invoice.base_amount }}</td>
-                </tr>
+            <tr>
+                <td>
+                    <strong>Accommodation Service</strong><br />
+                    <span style="font-size: 8pt; color: #64748b;">{{ invoice.room_details }} | Base Stay</span>
+                </td>
+                <td class="amount-cell">{{ invoice.base_amount }}</td>
+            </tr>
             {% endif %}
             {% if invoice.discount_amount > 0 %}
             <tr>
