@@ -17,6 +17,7 @@ class Invoice(models.Model):
     guest_email = models.EmailField()
     guest_phone = models.CharField(max_length=20, null=True, blank=True)
     guest_address = models.TextField(null=True, blank=True)
+    guest_gst_number = models.CharField(max_length=15, null=True, blank=True)
     
     room_details = models.CharField(max_length=255)
     room_count = models.PositiveIntegerField(default=1)

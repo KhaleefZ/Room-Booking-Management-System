@@ -31,6 +31,7 @@ export default function App() {
         <Route path="/bookings/:id" element={<BookingDetail />} />
         <Route path="/invoices" element={<InvoiceList />} />
         <Route path="/invoices/new" element={<InvoiceForm />} />
+        <Route path="/invoices/:id/edit" element={<InvoiceForm />} />
         <Route path="/guests" element={<GuestList />} />
         <Route path="/guests/new" element={<GuestForm />} />
         <Route path="/guests/:id" element={<GuestDetail />} />

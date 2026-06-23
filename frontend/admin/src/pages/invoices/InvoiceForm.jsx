@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRooms } from "../../api/rooms";
 import { getPublicSettings } from "../../api/settings";
-import { createInvoice, downloadManualInvoice } from "../../api/invoices";
+import { createInvoice, updateInvoice, getInvoice, downloadManualInvoice } from "../../api/invoices";
 import Spinner from "../../components/ui/Spinner";
 import toast from "react-hot-toast";
 import { format, addDays } from "date-fns";
 
 export default function InvoiceForm() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const qc = useQueryClient();
+  const isEdit = Boolean(id);
 
   const [form, setForm] = useState({
     invoice_number: "01",
@@ -18,6 +20,7 @@ export default function InvoiceForm() {
     guest_email: "",
     guest_phone: "",
     guest_address: "",
+    guest_gst_number: "",
     check_in: format(new Date(), "yyyy-MM-dd"),
     check_out: format(addDays(new Date(), 1), "yyyy-MM-dd"),
     selected_room_ids: [],
@@ -32,6 +35,43 @@ export default function InvoiceForm() {
     queryKey: ["rooms-all"],
     queryFn: () => getRooms({ page_size: 100 }),
   });
+
+  const { data: invoiceData, isLoading: invoiceLoading } = useQuery({
+    queryKey: ["invoice-detail", id],
+    queryFn: () => getInvoice(id),
+    enabled: isEdit,
+  });
+
+  useEffect(() => {
+    if (isEdit && invoiceData) {
+      const breakdown = invoiceData.breakdown || [];
+      const selectedRoomIds = breakdown.map(item => String(item.room_id));
+      const configs = {};
+      breakdown.forEach(item => {
+        configs[String(item.room_id)] = {
+          utilities: item.utilities || 0,
+          extra_guest_count: item.extra_guest_count || 0,
+          extra_guest_charge: item.extra_guest_charge || 500,
+          total_guest_count: item.total_guest_count || 1,
+        };
+      });
+
+      setForm({
+        invoice_number: invoiceData.invoice_number || "",
+        guest_name: invoiceData.guest_name || "",
+        guest_email: invoiceData.guest_email || "",
+        guest_phone: invoiceData.guest_phone || "",
+        guest_address: invoiceData.guest_address || "",
+        guest_gst_number: invoiceData.guest_gst_number || "",
+        check_in: invoiceData.check_in || "",
+        check_out: invoiceData.check_out || "",
+        selected_room_ids: selectedRoomIds,
+        discount_amount: Number(invoiceData.discount_amount) || 0,
+        description: invoiceData.description || "",
+      });
+      setRoomConfigs(configs);
+    }
+  }, [isEdit, invoiceData]);
 
   const { data: settings } = useQuery({
     queryKey: ["public-settings"],
@@ -142,10 +182,13 @@ export default function InvoiceForm() {
   };
 
   const mutation = useMutation({
-    mutationFn: createInvoice,
+    mutationFn: (payload) => isEdit ? updateInvoice(id, payload) : createInvoice(payload),
     onSuccess: (data) => {
-      toast.success("Manual invoice saved successfully!");
+      toast.success(isEdit ? "Invoice updated successfully!" : "Manual invoice saved successfully!");
       qc.invalidateQueries(["invoices-list"]);
+      if (isEdit) {
+        qc.invalidateQueries(["invoice-detail", id]);
+      }
       
       // Auto-trigger invoice download
       toast.promise(downloadManualInvoice(data.id), {
@@ -163,7 +206,7 @@ export default function InvoiceForm() {
           toast.error(`${key}: ${errorData[key]}`);
         });
       } else {
-        toast.error("Failed to create manual invoice. Check inputs.");
+        toast.error(isEdit ? "Failed to update invoice. Check inputs." : "Failed to create manual invoice. Check inputs.");
       }
     },
   });
@@ -189,6 +232,7 @@ export default function InvoiceForm() {
       guest_email: form.guest_email,
       guest_phone: form.guest_phone,
       guest_address: form.guest_address,
+      guest_gst_number: form.guest_gst_number || null,
       room_details: roomDetailsStr,
       room_count: roomCount,
       check_in: form.check_in,
@@ -205,16 +249,20 @@ export default function InvoiceForm() {
     mutation.mutate(payload);
   };
 
+  const pageLoading = roomsLoading || (isEdit && invoiceLoading);
+
   return (
     <div className="max-w-4xl mx-auto pb-10">
       <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
         <div className="bg-slate-900 p-8 text-white relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500 rounded-full -mr-16 -mt-16 opacity-10 blur-xl" />
-          <h1 className="text-2xl font-black uppercase tracking-tight">Manual Invoice Generator</h1>
+          <h1 className="text-2xl font-black uppercase tracking-tight">
+            {isEdit ? "Edit Manual Invoice" : "Manual Invoice Generator"}
+          </h1>
           <p className="text-slate-400 text-xs mt-1 uppercase tracking-widest font-bold">Billing Operations Terminal</p>
         </div>
 
-        {roomsLoading ? (
+        {pageLoading ? (
           <Spinner className="py-20" />
         ) : (
           <form onSubmit={handleSubmit} className="p-8 space-y-8">
@@ -270,6 +318,16 @@ export default function InvoiceForm() {
                     onChange={(e) => setForm({ ...form, guest_phone: e.target.value })}
                     className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-brand-500 transition-colors"
                     placeholder="+91 9876543210"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Customer GSTIN (Optional)</label>
+                  <input
+                    type="text"
+                    value={form.guest_gst_number}
+                    onChange={(e) => setForm({ ...form, guest_gst_number: e.target.value.toUpperCase() })}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-brand-500 transition-colors"
+                    placeholder="e.g. 33ACYPT6253G1Z0"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -543,7 +601,9 @@ export default function InvoiceForm() {
                 disabled={mutation.isPending}
                 className="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {mutation.isPending ? "Generating Invoice..." : "Save & Download Invoice"}
+                {mutation.isPending 
+                  ? (isEdit ? "Updating Invoice..." : "Generating Invoice...") 
+                  : (isEdit ? "Update & Download Invoice" : "Save & Download Invoice")}
               </button>
               <button
                 type="button"

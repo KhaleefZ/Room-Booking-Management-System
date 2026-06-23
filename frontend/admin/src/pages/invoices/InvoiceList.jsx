@@ -111,18 +111,28 @@ export default function InvoiceList() {
                       ₹{Number(inv.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => {
-                          toast.promise(downloadManualInvoice(inv.id), {
-                            loading: 'Generating PDF...',
-                            success: 'Invoice downloaded successfully!',
-                            error: 'Failed to download invoice PDF'
-                          });
-                        }}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all"
-                      >
-                        Download PDF ↓
-                      </button>
+                      <div className="flex justify-end items-center gap-2">
+                        {!inv.booking && (
+                          <Link
+                            to={`/invoices/${inv.id}/edit`}
+                            className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all"
+                          >
+                            Edit
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => {
+                            toast.promise(downloadManualInvoice(inv.id), {
+                              loading: 'Generating PDF...',
+                              success: 'Invoice downloaded successfully!',
+                              error: 'Failed to download invoice PDF'
+                            });
+                          }}
+                          className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all"
+                        >
+                          Download PDF ↓
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

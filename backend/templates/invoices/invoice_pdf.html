@@ -300,6 +300,9 @@
                 {% if invoice.guest_address %}
                 <div style="color: #475569; font-size: 9pt; margin-top: 2px;">Address: {{ invoice.guest_address }}</div>
                 {% endif %}
+                {% if invoice.guest_gst_number %}
+                <div style="color: #475569; font-size: 9pt; margin-top: 2px;">Customer GSTIN: {{ invoice.guest_gst_number }}</div>
+                {% endif %}
             </td>
             <td class="summary-col" style="padding-left: 20px;">
                 <div class="section-title">Stay Details</div>

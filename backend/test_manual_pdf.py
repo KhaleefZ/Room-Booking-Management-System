@@ -23,6 +23,7 @@ class MockInvoice:
         self.guest_email = "manual_guest@example.com"
         self.guest_phone = "+919999999999"
         self.guest_address = "456 Side Street, Coimbatore - 641002"
+        self.guest_gst_number = "33ACYPT6253G1Z0"
         self.room_details = "Room 101 (Standard), Room 102 (Standard)"
         self.room_count = 5
         self.check_in = timezone.now().date()

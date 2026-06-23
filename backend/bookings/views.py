@@ -266,6 +266,11 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     serializer_class = InvoiceSerializer
     permission_classes = [IsAuthenticated]
 
+    def perform_update(self, serializer):
+        invoice = serializer.save()
+        invoice.pdf_generated = False
+        invoice.save(update_fields=['pdf_generated'])
+
     @action(detail=True, methods=["get"])
     def download(self, request, pk=None):
         invoice = self.get_object()

@@ -9,6 +9,9 @@ export const getInvoice = (id) =>
 export const createInvoice = (data) =>
   client.post("/bookings/invoices/", data).then((r) => r.data);
 
+export const updateInvoice = (id, data) =>
+  client.put(`/bookings/invoices/${id}/`, data).then((r) => r.data);
+
 export const downloadManualInvoice = (id) =>
   client.get(`/bookings/invoices/${id}/download/`, { responseType: 'blob' })
     .then((r) => {
