@@ -22,6 +22,7 @@ class Amenity(models.Model):
 class Room(models.Model):
     class RoomType(models.TextChoices):
         STANDARD = "Standard", "Standard"
+        PREMIUM = "Premium", "Premium"
 
     class Status(models.TextChoices):
         AVAILABLE = "Available", "Available"

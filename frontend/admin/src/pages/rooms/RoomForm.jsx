@@ -25,7 +25,7 @@ import {
   Briefcase
 } from "lucide-react";
 
-const ROOM_TYPES = ["Standard", "Deluxe", "Premium", "Suite", "Executive Suite"];
+const ROOM_TYPES = ["Standard", "Premium"];
 const STATUSES = ["Available", "Occupied", "Cleaning", "Maintenance", "Blocked"];
 
 export default function RoomForm() {
